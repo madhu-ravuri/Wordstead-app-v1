@@ -69,7 +69,7 @@ export function ProjectForm({
         <span>Back</span>
       </button>
       <div className="form-heading">
-        <p className="eyebrow">A new page</p>
+        <p className="eyebrow">{initialProject ? 'Revising the page' : 'A new page'}</p>
         <h1>{initialProject ? 'Edit project' : 'New project'}</h1>
       </div>
 
@@ -97,11 +97,9 @@ export function ProjectForm({
           <input
             id="starting-count"
             name="startingWordCount"
-            type="number"
-            min="0"
-            max="1000000"
-            step="1"
+            type="text"
             inputMode="numeric"
+            autoComplete="off"
             placeholder="0"
             value={values.startingWordCount}
             onChange={(event) => updateField('startingWordCount', event.currentTarget.value)}

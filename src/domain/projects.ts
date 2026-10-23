@@ -49,7 +49,9 @@ export function validateProjectForm(values: ProjectFormValues): {
   const errors: ProjectFieldErrors = {}
   const title = values.title.trim()
   const rawStartingCount = values.startingWordCount.trim()
-  const startingWordCount = rawStartingCount === '' ? 0 : Number(rawStartingCount)
+  // Digits only: rejects signs, decimals, exponents, and hex that Number() would accept.
+  const startingWordCount =
+    rawStartingCount === '' ? 0 : /^\d+$/.test(rawStartingCount) ? Number(rawStartingCount) : NaN
 
   if (!title) {
     errors.title = 'Enter a project title.'
@@ -121,6 +123,30 @@ export function getProjectTotal(
         session.projectId === project.id ? total + session.wordCount : total,
       0,
     )
+  )
+}
+
+// Latest project-field/status edit or session log time (§4 "date last edited").
+export function getLastEditedAt(
+  project: Project,
+  sessions: readonly WritingSession[] = [],
+): string {
+  return sessions.reduce(
+    (latest, session) =>
+      session.projectId === project.id && session.createdAt > latest ? session.createdAt : latest,
+    project.updatedAt,
+  )
+}
+
+export function sortByLastEdited(
+  projects: readonly Project[],
+  sessions: readonly WritingSession[] = [],
+): Project[] {
+  return [...projects].sort(
+    (a, b) =>
+      getLastEditedAt(b, sessions).localeCompare(getLastEditedAt(a, sessions)) ||
+      b.createdAt.localeCompare(a.createdAt) ||
+      a.id.localeCompare(b.id),
   )
 }
 

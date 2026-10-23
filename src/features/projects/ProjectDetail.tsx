@@ -84,14 +84,13 @@ export function ProjectDetail({
                 <dd>{formatDate(project.deadline)}</dd>
               </div>
             )}
+            {project.notes && (
+              <div>
+                <dt>Notes</dt>
+                <dd className="metadata-notes">{project.notes}</dd>
+              </div>
+            )}
           </dl>
-
-          {project.notes && (
-            <section className="notes-block" aria-labelledby="project-notes-heading">
-              <h2 id="project-notes-heading">Notes</h2>
-              <p>{project.notes}</p>
-            </section>
-          )}
         </section>
 
         <aside className="project-activity-panel" aria-labelledby="project-activity-heading">

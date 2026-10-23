@@ -160,8 +160,7 @@ h2 {
 .section-heading h2,
 .overall-heading h2,
 .project-activity-panel h2,
-.session-history-empty h2,
-.notes-block h2 {
+.session-history-empty h2 {
   margin: 0;
   font: 600 23px/1.2 var(--display);
 }
@@ -214,10 +213,8 @@ h2 {
 }
 
 .project-row-title {
-  overflow: hidden;
   font: 600 17px/1.25 var(--display);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .project-row-date {
@@ -574,21 +571,10 @@ h2 {
   font-weight: 600;
 }
 
-.notes-block {
-  margin-top: 24px;
-}
-
-.notes-block h2 {
-  margin-bottom: 9px;
-  font-size: 19px;
-}
-
-.notes-block p {
-  margin: 0;
+.project-metadata dd.metadata-notes {
   color: var(--ink-soft);
-  font-size: 14px;
+  font-weight: 500;
   line-height: 1.6;
-  overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
 
@@ -663,9 +649,11 @@ h2 {
   color: #653f43;
   font-size: 12px;
   font-weight: 600;
+  text-align: center;
 }
 
 .local-indicator {
+  flex-shrink: 0;
   width: 7px;
   height: 7px;
   border-radius: 50%;

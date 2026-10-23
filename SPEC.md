@@ -6,6 +6,8 @@ Wordstead is a local-first writing progress tracker for people working on multip
 
 The product is a responsive static web application suitable for free hosting on GitHub Pages. The supplied `mockup.png` is the visual source of truth for the dashboard, and `project page mockup.png` is the visual source of truth for the individual project view. Other screens extend the visual language of these references without changing their core hierarchy.
 
+**Approved layout deviation (Phase 1 review):** The app uses a "postcard" composition: the masthead sits above a single cream paper panel on the coral field, and the overall chart (dashboard) and project sparkline (project detail) sit inside that panel, to the right of the project content on wide layouts, rather than on the coral field outside it as drawn in the mockups. The mockups remain the reference for palette, typography character, pill treatments, chart styling, and information hierarchy.
+
 ### Recommended technology
 
 - **Vite, React, and TypeScript:** a small, widely supported front-end toolchain that produces static assets and can be hosted directly from GitHub Pages. Client-side routing, if used, must support GitHub Pages' static-hosting constraints.
@@ -192,6 +194,8 @@ The storage format must be versioned so future releases can migrate backups and 
 **AC 3.** The detail view provides project edit, log-session, complete/reopen, and delete actions appropriate to the project's state.
 
 **AC 4.** A separate completed-projects section lists completed, non-deleted projects and allows opening and reopening them.
+
+**AC 4a.** The active and completed sections each list projects by date last edited (§4), most recent first.
 
 **AC 5.** Empty active, completed, and session-history states provide a clear next action where applicable.
 

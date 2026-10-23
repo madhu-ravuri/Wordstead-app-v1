@@ -79,3 +79,43 @@
   - **How it was caught:** Automated Playwright test `project detail pencil control receives visible keyboard focus` timed out looking for a project row.
   - **Fix:** Create the required project inside the focus test before checking the pencil control.
   - **Spec change needed:** No.
+
+## 2026-10-23 — Independent Phase 1 verification
+
+Re-ran the full verification contract after a clean `npm ci` (unit 20/20, E2E 4/4, lint, typecheck, build all pass), then walked the Phase 1 manual checklist in Chromium at 1440×900 and 375×740. The issues below were found and resolved with the user's decisions before Phase 2. After the fixes: unit 34/34, E2E 7/7, and lint, typecheck, and build all pass.
+
+- **Phase:** Phase 1
+  - **What went wrong:** Malformed starting word counts are saved as 0 with no error. The field is `type="number"`. When the browser can't parse what was typed (for example `1-`, `--5`, `e`), it reports the value as `""`, and `validateProjectForm` treats `""` as "omitted" and defaults it to 0. Separately, `1e3` is accepted and stored as 1,000. This violates §5.2 AC 3, which says invalid input must block saving and show a validation message.
+  - **How it was caught:** Manual browser probe, typing each value into the field and pressing Save.
+  - **Fix:** The field is now `type="text"` with `inputMode="numeric"`, so the app sees exactly what was typed. `validateProjectForm` accepts digits only (`/^\d+$/` after trimming) and still treats blank as 0. Added unit, component, and E2E cases for `1-`, `--5`, `e`, `1e3`, `0x10`, `+5`, `12abc`, and `1 000`.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 1
+  - **What went wrong:** The automated tests don't cover everything the plan specifies. The plan's browser test is "create, reload, verify it remains on the dashboard, open details, edit, verify the changed fields persist". The E2E test reloads on the detail page without ever checking the dashboard list, and it only edits the title and starting count, not deadline, synopsis, or notes. The plan's component test for "project edit prefill/save" checks the title prefill only and never saves.
+  - **How it was caught:** Comparing `tests/e2e/projects.spec.ts` and `ProjectDetail.test.tsx` against IMP_PLAN.md Phase 1 "Automated verification".
+  - **Fix:** The main E2E test now checks the dashboard row after a reload, then edits and reloads all five fields, confirming each value and that notes render as plain text. Added a `ProjectDetail` component test that checks every field is filled in, saves an edit, and confirms the saved values.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 1
+  - **What went wrong:** Notes appear as a separate "Notes" heading and paragraph, not as an aligned metadata row. §5.7 AC 8 and the project-page mockup put last edited, word count, deadline, and notes in the same aligned rows.
+  - **How it was caught:** Manual comparison of the detail view against `project page mockup.png`.
+  - **Fix:** Notes are now a row in the `project-metadata` list (`dd.metadata-notes`, keeping line breaks and wrapping long text). Removed the separate notes block and its styles.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 1
+  - **What went wrong:** The dashboard and detail view depart from the mockups in their composition. Both charts sit inside the cream panel; in the mockups they sit on the coral background beside the panel. The masthead is a small serif wordmark with an icon, where the mockups use large script lettering on a torn notebook-paper tab that overlaps the panel. The `+` and pencil buttons are burgundy, not coral. The pill rows have a tan shadow, not the olive edge and burgundy shadow. The dashboard adds "Your writing desk / In progress" headings that the mockup doesn't have. The checklist item "Check the detail page against the project-page mockup" was ticked anyway. See §5.9 AC 1, 2 and §5.7 AC 6.
+  - **How it was caught:** Side-by-side comparison of screenshots with `mockup.png` and `project page mockup.png`.
+  - **Fix:** No code change. The user reviewed the screenshots and chose to keep the current "postcard" layout, since the color scheme matches.
+  - **Spec change needed:** Yes. Recorded as an approved layout deviation in `SPEC.md` §1, so the Phase 5 mockup comparison keeps this layout.
+
+- **Phase:** Phase 1
+  - **What went wrong:** Project order is effectively random and changes after a reload. `listProjects` returns IndexedDB key order (random UUIDs), while a newly created project is appended to the end of the in-memory list. So a new project shows last, then moves somewhere else on the next load.
+  - **How it was caught:** Code review of `WordsteadRepository.listProjects` and `App.handleCreate`.
+  - **Fix:** Added `getLastEditedAt` and `sortByLastEdited` in `src/domain/projects.ts`. Lists sort by latest edit, then newest creation, then id. Latest edit already counts session log times (§4), so Phase 2 only needs to pass in sessions. Both the active and completed lists use it. Covered by unit tests and an E2E test that edits an older project and confirms the order before and after a reload.
+  - **Spec change needed:** Yes. The user chose most recently edited first, recorded as `SPEC.md` §5.7 AC 4a.
+
+- **Phase:** Phase 1
+  - **What went wrong:** Minor wording and UI issues. The footer says "Your writing stays in this browser" but doesn't say the data is not synchronized across devices (§5.1 AC 4 asks for both). The edit form shows the eyebrow "A new page", which is meant for new projects. On phone width, long project titles on dashboard rows are cut off with an ellipsis (§5.9 AC 7: no clipped text). The detail view wraps them correctly.
+  - **How it was caught:** Manual browser walkthrough and screenshots.
+  - **Fix:** The footer now reads "Your writing stays in this browser and isn't synced to other devices". The edit form's eyebrow now reads "Revising the page". Dashboard row titles now wrap instead of being cut off. An E2E test checks a long title at 375px for clipping and sideways scrolling.
+  - **Spec change needed:** No.

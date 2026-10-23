@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
   createProject,
+  getLastEditedAt,
   getProjectTotal,
+  sortByLastEdited,
   updateProject,
   validateProjectForm,
   type ProjectFormValues,
@@ -38,11 +40,19 @@ describe('validateProjectForm', () => {
     ).toBe(1_000_000)
   })
 
-  it.each(['-1', '1.5', '1000001', 'not a number'])('rejects invalid starting count %s', (count) => {
+  const invalidStartingCounts = [
+    '-1', '1.5', '1000001', 'not a number', '1e3', '0x10', '+5', '1-', '--5', 'e', '12abc', '1 000',
+  ]
+
+  it.each(invalidStartingCounts)('rejects invalid starting count %s', (count) => {
     const result = validateProjectForm({ ...validForm, startingWordCount: count })
 
     expect(result.fields).toBeNull()
     expect(result.errors.startingWordCount).toBeDefined()
+  })
+
+  it('accepts a whole number surrounded by whitespace', () => {
+    expect(validateProjectForm({ ...validForm, startingWordCount: ' 42 ' }).fields?.startingWordCount).toBe(42)
   })
 
   it('rejects a blank title', () => {
@@ -126,5 +136,41 @@ describe('project operations', () => {
 
     expect(getProjectTotal(project)).toBe(1_000_000)
     expect(getProjectTotal(project, sessions)).toBe(2_000_000)
+  })
+})
+
+describe('last-edited ordering', () => {
+  const fields = { title: 'Draft', startingWordCount: 0, deadline: null, synopsis: null, notes: null }
+
+  it('lists the most recently edited project first', () => {
+    const older = createProject(fields, 'older', '2026-10-01T09:00:00.000Z')
+    const newer = createProject(fields, 'newer', '2026-10-02T09:00:00.000Z')
+    const editedOlder = updateProject(older, { ...fields, title: 'Revised' }, '2026-10-03T09:00:00.000Z')
+
+    expect(sortByLastEdited([older, newer]).map((project) => project.id)).toEqual(['newer', 'older'])
+    expect(sortByLastEdited([editedOlder, newer]).map((project) => project.id)).toEqual(['older', 'newer'])
+  })
+
+  it('breaks last-edited ties by newest creation, then id', () => {
+    const a = { ...createProject(fields, 'a', '2026-10-01T09:00:00.000Z'), updatedAt: '2026-10-05T09:00:00.000Z' }
+    const b = { ...createProject(fields, 'b', '2026-10-02T09:00:00.000Z'), updatedAt: '2026-10-05T09:00:00.000Z' }
+    const c = { ...createProject(fields, 'c', '2026-10-02T09:00:00.000Z'), updatedAt: '2026-10-05T09:00:00.000Z' }
+
+    expect(sortByLastEdited([a, c, b]).map((project) => project.id)).toEqual(['b', 'c', 'a'])
+  })
+
+  it("uses the latest session log time when it is later than the project's edit time", () => {
+    const project = createProject(fields, 'p', '2026-10-01T09:00:00.000Z')
+    const session: WritingSession = {
+      id: 's',
+      projectId: 'p',
+      date: '2026-09-20',
+      wordCount: 10,
+      createdAt: '2026-10-04T09:00:00.000Z',
+      updatedAt: '2026-10-06T09:00:00.000Z',
+    }
+
+    expect(getLastEditedAt(project, [session])).toBe('2026-10-04T09:00:00.000Z')
+    expect(getLastEditedAt(project, [{ ...session, projectId: 'other' }])).toBe(project.updatedAt)
   })
 })

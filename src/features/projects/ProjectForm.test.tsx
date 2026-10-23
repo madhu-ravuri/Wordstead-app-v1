@@ -35,6 +35,20 @@ describe('ProjectForm', () => {
     expect(screen.getByText(/whole number from 0 to 1,000,000/i)).toBeInTheDocument()
   })
 
+  it('blocks a malformed starting count instead of saving it as zero', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue(undefined)
+
+    render(<ProjectForm onCancel={vi.fn()} onSubmit={onSubmit} />)
+    await user.type(screen.getByLabelText(/title/i), 'Typo draft')
+    await user.type(screen.getByLabelText(/starting word count/i), '1-')
+    await user.click(screen.getByRole('button', { name: 'Save project' }))
+
+    expect(onSubmit).not.toHaveBeenCalled()
+    expect(screen.getByText(/whole number from 0 to 1,000,000/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/starting word count/i)).toHaveValue('1-')
+  })
+
   it('reports persistence failures without clearing form input', async () => {
     const user = userEvent.setup()
     const onSubmit = vi.fn().mockRejectedValue(new Error('Storage is unavailable.'))

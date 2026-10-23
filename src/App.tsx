@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { BookOpenText } from 'lucide-react'
 import { WordsteadRepository } from './data/database'
-import { createProject, updateProject, type Project, type ProjectFields } from './domain/projects'
+import {
+  createProject,
+  sortByLastEdited,
+  updateProject,
+  type Project,
+  type ProjectFields,
+} from './domain/projects'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { ProjectDetail } from './features/projects/ProjectDetail'
 import { ProjectForm } from './features/projects/ProjectForm'
@@ -81,8 +87,12 @@ function App() {
     setProjects((current) => current.map((item) => (item.id === project.id ? updatedProject : item)))
   }
 
-  const activeProjects = projects.filter((project) => !project.deletedAt && !project.completedAt)
-  const completedProjects = projects.filter((project) => !project.deletedAt && project.completedAt)
+  const activeProjects = sortByLastEdited(
+    projects.filter((project) => !project.deletedAt && !project.completedAt),
+  )
+  const completedProjects = sortByLastEdited(
+    projects.filter((project) => !project.deletedAt && project.completedAt),
+  )
   const selectedProject = route.page === 'project'
     ? projects.find((project) => project.id === route.id && !project.deletedAt)
     : undefined
@@ -143,7 +153,7 @@ function App() {
 
       <footer className="local-footer">
         <span className="local-indicator" aria-hidden="true" />
-        Your writing stays in this browser
+        Your writing stays in this browser and isn’t synced to other devices
       </footer>
     </div>
   )
