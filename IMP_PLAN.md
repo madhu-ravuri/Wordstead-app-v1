@@ -63,12 +63,12 @@ npm run build
 
 ### Manual completion checklist
 
-- [ ] Open the empty dashboard and create a project from `+`. **§5.2 AC 1, 6; §5.9 AC 3**
-- [ ] Try a whitespace-only title and invalid/negative/fractional/1,000,001 starting counts; confirm saving is blocked. Confirm 0 and 1,000,000 are accepted. **§5.2 AC 3, 4**
-- [ ] Create a project with omitted count and another with a nonzero count; confirm totals start at zero and the entered value respectively. **§5.2 AC 2, 3, 6**
-- [ ] Edit title, starting count, deadline, synopsis, and notes; confirm values persist after reload and notes are plain text. **§5.2 AC 5, 7, 8; §5.1 AC 2**
-- [ ] Check the detail page against the project-page mockup, including pencil control, information hierarchy, focus state, and no-session state. **§5.7 AC 1, 5-8, 10**
-- [ ] Resize to phone width and verify the implemented dashboard, form, and detail view do not horizontally overflow. **§5.9 AC 5, 7**
+- [x] Open the empty dashboard and create a project from `+`. **§5.2 AC 1, 6; §5.9 AC 3**
+- [x] Try a whitespace-only title and invalid/negative/fractional/1,000,001 starting counts; confirm saving is blocked. Confirm 0 and 1,000,000 are accepted. **§5.2 AC 3, 4**
+- [x] Create a project with omitted count and another with a nonzero count; confirm totals start at zero and the entered value respectively. **§5.2 AC 2, 3, 6**
+- [x] Edit title, starting count, deadline, synopsis, and notes; confirm values persist after reload and notes are plain text. **§5.2 AC 5, 7, 8; §5.1 AC 2**
+- [x] Check the detail page against the project-page mockup, including pencil control, information hierarchy, focus state, and no-session state. **§5.7 AC 1, 5-8, 10**
+- [x] Resize to phone width and verify the implemented dashboard, form, and detail view do not horizontally overflow. **§5.9 AC 5, 7**
 
 ## Phase 2: Session Logging and Accurate Activity Charts
 
