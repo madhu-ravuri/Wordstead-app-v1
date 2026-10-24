@@ -1,3 +1,5 @@
+import { isLocalDate } from './dates'
+
 export const MAX_WORD_COUNT = 1_000_000
 
 export type ProjectStatus = 'active' | 'completed' | 'deleted'
@@ -40,6 +42,12 @@ export interface ProjectFields {
   notes: string | null
 }
 
+// Digits only: rejects signs, decimals, exponents, and hex that Number() would accept.
+export function parseWholeNumber(value: string): number | null {
+  const trimmed = value.trim()
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : null
+}
+
 export type ProjectFieldErrors = Partial<Record<keyof ProjectFormValues, string>>
 
 export function validateProjectForm(values: ProjectFormValues): {
@@ -49,16 +57,14 @@ export function validateProjectForm(values: ProjectFormValues): {
   const errors: ProjectFieldErrors = {}
   const title = values.title.trim()
   const rawStartingCount = values.startingWordCount.trim()
-  // Digits only: rejects signs, decimals, exponents, and hex that Number() would accept.
-  const startingWordCount =
-    rawStartingCount === '' ? 0 : /^\d+$/.test(rawStartingCount) ? Number(rawStartingCount) : NaN
+  const startingWordCount = rawStartingCount === '' ? 0 : parseWholeNumber(rawStartingCount)
 
   if (!title) {
     errors.title = 'Enter a project title.'
   }
 
   if (
-    !Number.isInteger(startingWordCount) ||
+    startingWordCount === null ||
     startingWordCount < 0 ||
     startingWordCount > MAX_WORD_COUNT
   ) {
@@ -69,7 +75,7 @@ export function validateProjectForm(values: ProjectFormValues): {
     errors.deadline = 'Enter a valid deadline.'
   }
 
-  if (Object.keys(errors).length > 0) {
+  if (startingWordCount === null || Object.keys(errors).length > 0) {
     return { fields: null, errors }
   }
 
@@ -148,17 +154,4 @@ export function sortByLastEdited(
       b.createdAt.localeCompare(a.createdAt) ||
       a.id.localeCompare(b.id),
   )
-}
-
-export function getLocalCalendarDate(dateTime: string): string {
-  const date = new Date(dateTime)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
-function isLocalDate(value: string): boolean {
-  const parsed = new Date(`${value}T00:00:00`)
-  return !Number.isNaN(parsed.getTime()) && getLocalCalendarDate(parsed.toISOString()) === value
 }

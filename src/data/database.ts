@@ -67,6 +67,27 @@ export class WordsteadRepository {
     })
   }
 
+  async listSessions(): Promise<WritingSession[]> {
+    return this.withStorageErrors('load writing sessions', async () => {
+      const database = await this.database
+      return database.getAll('sessions')
+    })
+  }
+
+  async saveSession(session: WritingSession): Promise<void> {
+    await this.withStorageErrors('save this session', async () => {
+      const database = await this.database
+      await database.put('sessions', session)
+    })
+  }
+
+  async deleteSession(id: string): Promise<void> {
+    await this.withStorageErrors('delete this session', async () => {
+      const database = await this.database
+      await database.delete('sessions', id)
+    })
+  }
+
   async close(): Promise<void> {
     return this.withStorageErrors('close browser storage', async () => {
       const database = await this.database

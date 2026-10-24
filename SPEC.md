@@ -143,7 +143,7 @@ The storage format must be versioned so future releases can migrate backups and 
 
 **AC 3.** The project sparkline contains one point per local calendar day in its displayed range. Each point is the sum of session words for that day; days without sessions have value zero.
 
-**AC 4.** For a project at least seven calendar days old, the chart displays the current local date and previous six local dates. For a project created less than seven days ago, the first point is the earlier of its creation date and its earliest session date; the range continues through the current local date.
+**AC 4.** For a project at least seven calendar days old, the chart displays the current local date and previous six local dates. For a project created less than seven days ago, the first point is the earlier of its creation date and its earliest session date, but never earlier than six days before the current local date; the range continues through the current local date. The project chart therefore never shows more than seven days. Sessions dated before that window still count toward the project total and the overall chart.
 
 **AC 5.** The project sparkline plots daily session counts only. Starting count changes do not add points, affect point heights, or mark a day as activity.
 
@@ -237,7 +237,7 @@ The storage format must be versioned so future releases can migrate backups and 
 
 **AC 4.** The new-project form, session editor, completed-project section, confirmation dialog, and import/export flows use the dashboard's visual language. The project detail follows `project page mockup.png` for its specific hierarchy and composition while retaining that shared palette, typography character, shadows, and paper-inspired treatment.
 
-**AC 5.** On phone-sized viewports, the dashboard stacks its content into a single-column layout, keeps project actions reachable, and places the overall chart without horizontal page scrolling. The project detail stacks its information panel and project sparkline, keeps the edit control reachable, and preserves a readable session history without horizontal page scrolling.
+**AC 5.** On phone-sized viewports, the dashboard stacks its content into a single-column layout, keeps project actions reachable, and places the overall chart first (so the overall trend is seen first), followed by the dashboard heading and `+` action directly above the project list, without horizontal page scrolling. The project detail stacks its information panel and project sparkline, keeps the edit control reachable, and preserves a readable session history without horizontal page scrolling.
 
 **AC 6.** All primary actions are keyboard operable, visible focus is provided, form controls have programmatic labels, chart meaning is available in accessible text, and color alone is not the only way to communicate state.
 
@@ -249,7 +249,7 @@ The storage format must be versioned so future releases can migrate backups and 
 - A project has a nonzero starting count and no sessions: its total is nonzero, while its project and overall charts show no activity for that starting count.
 - Several sessions share a project and date: each remains individually editable; the chart shows their sum and one activity marker for the day.
 - A user attempts to select or submit a future session date: the date is unavailable or rejected with a validation message; no session is saved.
-- The user logs a session dated before the project's creation date: retain the entered date; for a project younger than seven days, the sparkline begins at the earlier of creation and earliest session.
+- The user logs a session dated before the project's creation date: retain the entered date; for a project younger than seven days, the sparkline begins at the earlier of creation and earliest session, capped at the seven-day window.
 - An edit moves a session to a date outside the visible chart window: update totals and any affected point in range; dates outside the specified range remain outside the chart.
 - Deleting the only session on a day leaves that date as zero if it is in the chart range and removes its activity marker.
 - A user completes and later reopens a project: neither transition changes chart data.
@@ -270,7 +270,7 @@ The storage format must be versioned so future releases can migrate backups and 
 5. Deleted projects are soft-deleted and retained in storage and backups. A deleted-project archive UI is deferred; retained deleted sessions cannot be corrected through the initial UI.
 6. Merge import deduplicates stable identifiers. If the same identifier has differing content, the user chooses which version to keep for that conflict; cancellation makes no changes.
 7. The project sparkline's seven-day window includes today and the six preceding local calendar dates. The overall chart's 30-day window includes today and the 29 preceding dates.
-8. If a project is younger than seven days, its project chart starts at the earlier of its creation date and earliest session date. If there is no session, it starts at its creation date.
+8. If a project is younger than seven days, its project chart starts at the earlier of its creation date and earliest session date, but no earlier than six days before today, so it never exceeds seven days. If there is no session, it starts at its creation date.
 9. The overall chart's range is based on the earliest retained session date, including sessions belonging to deleted projects. If there are no sessions, the chart presents its empty state.
 10. Targets, running-total display mode, chart activity tooltips, and deleted-project history are deferred rather than implied by the initial interface.
 

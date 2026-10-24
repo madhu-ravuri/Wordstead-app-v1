@@ -1,35 +1,45 @@
 import { useState } from 'react'
 import { ArrowLeft, Pencil } from 'lucide-react'
-import { getLocalCalendarDate, getProjectTotal, type Project, type ProjectFields } from '../../domain/projects'
+import { formatCalendarDate, getLocalCalendarDate } from '../../domain/dates'
+import {
+  getLastEditedAt,
+  getProjectTotal,
+  type Project,
+  type ProjectFields,
+  type WritingSession,
+} from '../../domain/projects'
+import type { SessionFields } from '../../domain/sessions'
+import { describeSeries, getProjectSeries } from '../../domain/sparkline'
+import { ActivityChart } from '../charts/ActivityChart'
+import { SessionHistory } from '../sessions/SessionHistory'
 import { ProjectForm } from './ProjectForm'
 
 interface ProjectDetailProps {
   project: Project
+  /** Sessions belonging to this project. */
+  sessions: readonly WritingSession[]
+  today: string
   onBack: () => void
   onSave: (fields: ProjectFields) => Promise<void>
+  onLogSession: (fields: SessionFields) => Promise<void>
+  onUpdateSession: (session: WritingSession, fields: SessionFields) => Promise<void>
+  onDeleteSession: (session: WritingSession) => Promise<void>
   storageUnavailable: boolean
-}
-
-function formatDate(value: string): string {
-  const [year, month, day] = value.split('-').map(Number)
-  return new Intl.DateTimeFormat(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date(year, month - 1, day))
-}
-
-function formatEditedDate(dateTime: string): string {
-  return formatDate(getLocalCalendarDate(dateTime))
 }
 
 export function ProjectDetail({
   project,
+  sessions,
+  today,
   onBack,
   onSave,
+  onLogSession,
+  onUpdateSession,
+  onDeleteSession,
   storageUnavailable,
 }: ProjectDetailProps) {
   const [isEditing, setIsEditing] = useState(false)
+  const series = getProjectSeries(project, sessions, today)
 
   if (isEditing) {
     return (
@@ -72,16 +82,16 @@ export function ProjectDetail({
           <dl className="project-metadata">
             <div>
               <dt>Date last edited</dt>
-              <dd>{formatEditedDate(project.updatedAt)}</dd>
+              <dd>{formatCalendarDate(getLocalCalendarDate(getLastEditedAt(project, sessions)))}</dd>
             </div>
             <div>
               <dt>Word count</dt>
-              <dd>{new Intl.NumberFormat().format(getProjectTotal(project))}</dd>
+              <dd>{new Intl.NumberFormat().format(getProjectTotal(project, sessions))}</dd>
             </div>
             {project.deadline && (
               <div>
                 <dt>Deadline</dt>
-                <dd>{formatDate(project.deadline)}</dd>
+                <dd>{formatCalendarDate(project.deadline)}</dd>
               </div>
             )}
             {project.notes && (
@@ -96,20 +106,24 @@ export function ProjectDetail({
         <aside className="project-activity-panel" aria-labelledby="project-activity-heading">
           <p className="eyebrow">Recent rhythm</p>
           <h2 id="project-activity-heading">Writing activity</h2>
-          <div className="project-chart-empty" role="img" aria-label="No writing sessions recorded for this project">
-            <span className="chart-baseline" aria-hidden="true" />
-            <p>No writing sessions yet</p>
-          </div>
+          <ActivityChart
+            points={series}
+            variant="detail"
+            description={`Daily words for ${project.title}. ${describeSeries(series)}`}
+          />
+          {sessions.length === 0 && <p className="chart-note">No writing sessions yet</p>}
         </aside>
       </div>
 
-      <section className="session-history-empty" aria-labelledby="session-history-heading">
-        <div>
-          <p className="eyebrow">The pages so far</p>
-          <h2 id="session-history-heading">Writing sessions</h2>
-        </div>
-        <p>No sessions recorded</p>
-      </section>
+      <SessionHistory
+        sessions={sessions}
+        today={today}
+        canLog={!project.completedAt}
+        onLog={onLogSession}
+        onUpdate={onUpdateSession}
+        onDelete={onDeleteSession}
+        storageUnavailable={storageUnavailable}
+      />
     </div>
   )
 }

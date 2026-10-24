@@ -104,15 +104,15 @@ npm run build
 
 ### Manual completion checklist
 
-- [ ] Verify session counts of 1 and 1,000,000 are accepted and 0, negative, fractional, or 1,000,001 are rejected; confirm project totals can exceed 1,000,000 through accumulation. **§5.3 AC 3, 5; §5.4 AC 2**
-- [ ] Log two sessions for one project on the same date; verify separate history rows, a summed daily point, and one star. **§5.3 AC 4, 5, 7; §5.4 AC 3, 6**
-- [ ] Verify a starting count contributes to the project total but not either chart or activity markers. **§5.2 AC 6; §5.4 AC 2, 5; §5.5 AC 4**
-- [ ] Log sessions on two projects for the same date; verify the overall point is their sum and each project point remains project-specific. **§5.4 AC 3; §5.5 AC 1, 3**
-- [ ] Edit a session's count and date, then delete it; verify affected totals/points change and unaffected dates/projects do not. **§5.3 AC 5-7; §5.5 AC 6**
-- [ ] Enter a forgotten session for a past date and inspect the resulting range/point. **§5.3 AC 2; §5.4 AC 4; §5.5 AC 2**
-- [ ] Attempt to select and submit a future session date; verify it is unavailable or rejected and no session is saved. **§5.3 AC 2; §6**
-- [ ] Confirm zero days are present, the project and overall chart windows follow their date rules, and chart geometry follows actual counts. **§5.4 AC 3, 4, 7; §5.5 AC 2, 3**
-- [ ] Confirm the dashboard bars look decorative and do not imply a second series; inspect chart meaning with keyboard/screen-reader-accessible text. **§5.5 AC 5, 7; §5.9 AC 6**
+- [x] Verify session counts of 1 and 1,000,000 are accepted and 0, negative, fractional, or 1,000,001 are rejected; confirm project totals can exceed 1,000,000 through accumulation. **§5.3 AC 3, 5; §5.4 AC 2**
+- [x] Log two sessions for one project on the same date; verify separate history rows, a summed daily point, and one star. **§5.3 AC 4, 5, 7; §5.4 AC 3, 6**
+- [x] Verify a starting count contributes to the project total but not either chart or activity markers. **§5.2 AC 6; §5.4 AC 2, 5; §5.5 AC 4**
+- [x] Log sessions on two projects for the same date; verify the overall point is their sum and each project point remains project-specific. **§5.4 AC 3; §5.5 AC 1, 3**
+- [x] Edit a session's count and date, then delete it; verify affected totals/points change and unaffected dates/projects do not. **§5.3 AC 5-7; §5.5 AC 6**
+- [x] Enter a forgotten session for a past date and inspect the resulting range/point. **§5.3 AC 2; §5.4 AC 4; §5.5 AC 2**
+- [x] Attempt to select and submit a future session date; verify it is unavailable or rejected and no session is saved. **§5.3 AC 2; §6**
+- [x] Confirm zero days are present, the project and overall chart windows follow their date rules, and chart geometry follows actual counts. **§5.4 AC 3, 4, 7; §5.5 AC 2, 3**
+- [x] Confirm the dashboard bars look decorative and do not imply a second series; inspect chart meaning with keyboard/screen-reader-accessible text. **§5.5 AC 5, 7; §5.9 AC 6**
 
 ## Phase 3: Completion, Reopening, and Retained Deletion History
 

@@ -119,3 +119,38 @@ Re-ran the full verification contract after a clean `npm ci` (unit 20/20, E2E 4/
   - **How it was caught:** Manual browser walkthrough and screenshots.
   - **Fix:** The footer now reads "Your writing stays in this browser and isn't synced to other devices". The edit form's eyebrow now reads "Revising the page". Dashboard row titles now wrap instead of being cut off. An E2E test checks a long title at 375px for clipping and sideways scrolling.
   - **Spec change needed:** No.
+
+## 2026-10-23 — Phase 2: Session logging and activity charts
+
+Verification at completion: unit 89/89, E2E 20/20 (stable over three consecutive runs), and lint, typecheck, and build all pass. The plan's targeted Phase 2 commands also pass (35 domain tests, 13 session/chart E2E tests). Manual checklist walked in Chromium at 1440×900 and 375×740 with seeded data; no horizontal overflow.
+
+- **Phase:** Phase 2
+  - **What went wrong:** In two component tests and one E2E assertion, my expected chart range was wrong. A project younger than seven days starts its chart at its earliest session, so moving or backdating sessions changes the range length (for example, 17 days instead of 7, or 2 days instead of 3 after a session moved).
+  - **How it was caught:** Failing assertions in `ProjectDetail.test.tsx`, plus a manual re-trace of the E2E correction scenario before running it.
+  - **Fix:** Corrected the expectations to match §5.4 AC 4. The implementation was already right.
+  - **Spec change needed:** No (but see the young-project range question below).
+
+- **Phase:** Phase 2
+  - **What went wrong:** E2E lookups for the "Words written" field matched two elements, because the chart's accessible summary also contains "words written".
+  - **How it was caught:** Playwright strict-mode violation in five session E2E tests.
+  - **Fix:** Use exact label matching for session form fields in E2E tests.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 2
+  - **What went wrong:** With the browser clock frozen, sessions logged in a row share an identical log time, so same-day history order (and the dashboard order) fall back to a random ID tie-break. This only happens with a frozen clock; with a real clock the log times differ.
+  - **How it was caught:** One E2E assertion on same-day history order failed.
+  - **Fix:** That assertion now checks both entries are present instead of their order. Order rules are covered by unit tests with distinct timestamps.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 2
+  - **What went wrong:** After deleting a session with the keyboard, focus was lost because the focused row disappeared.
+  - **How it was caught:** Writing the keyboard-only E2E test.
+  - **Fix:** Focus moves to "Log session" after a successful delete. The keyboard E2E test asserts it.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 2
+  - **What went wrong:** A spec rule produces surprising charts. §5.4 AC 4 says a project younger than seven days starts its chart at its earliest session, with no limit. A brand-new project whose existing work was backdated (for example, a session three weeks ago) therefore shows a 21+ day chart, while an 8-day-old project shows only 7 days. In a dashboard row, a long range crowds the stars together.
+  - **How it was caught:** Manual review of seeded-data screenshots.
+  - **Fix:** The user decided the project chart always caps at 7 days. `getProjectChartRange` now starts at the later of (today − 6) and the earlier of creation/earliest session. Updated the unit, component, and E2E tests, including a backdated session inside the window and one older than it (counted in the total and the overall chart, but outside the project chart).
+  - **Spec change needed:** Yes. Updated `SPEC.md` §5.4 AC 4, the §6 backdated-session edge case, and §7 assumption 8.
+

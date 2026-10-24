@@ -81,6 +81,7 @@
 }
 
 .dashboard-topline {
+  grid-area: top;
   margin-bottom: 29px;
 }
 
@@ -140,13 +141,17 @@ h2 {
   opacity: 0.5;
 }
 
-.dashboard-columns {
+.dashboard-layout {
   display: grid;
+  grid-template-areas:
+    'top top'
+    'list overall';
   grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
-  gap: clamp(32px, 5vw, 70px);
+  column-gap: clamp(32px, 5vw, 70px);
 }
 
 .project-list-column {
+  grid-area: list;
   min-width: 0;
 }
 
@@ -160,7 +165,7 @@ h2 {
 .section-heading h2,
 .overall-heading h2,
 .project-activity-panel h2,
-.session-history-empty h2 {
+.session-history h2 {
   margin: 0;
   font: 600 23px/1.2 var(--display);
 }
@@ -184,10 +189,12 @@ h2 {
 }
 
 .project-row {
+  position: relative;
   display: grid;
   width: 100%;
   min-height: 77px;
-  grid-template-columns: minmax(0, 1fr) auto 26px;
+  grid-template-areas: 'copy spark count open';
+  grid-template-columns: minmax(0, 1fr) 112px auto 26px;
   align-items: center;
   gap: 15px;
   padding: 11px 15px 11px 20px;
@@ -207,6 +214,7 @@ h2 {
 }
 
 .project-row-copy {
+  grid-area: copy;
   display: grid;
   min-width: 0;
   gap: 3px;
@@ -223,6 +231,7 @@ h2 {
 }
 
 .project-row-count {
+  grid-area: count;
   display: flex;
   align-items: baseline;
   gap: 5px;
@@ -238,6 +247,7 @@ h2 {
 }
 
 .project-row-open {
+  grid-area: open;
   display: grid;
   place-items: center;
   color: #bd7a70;
@@ -309,6 +319,7 @@ h2 {
 }
 
 .overall-panel {
+  grid-area: overall;
   align-self: start;
   min-width: 0;
   padding-left: clamp(0px, 2vw, 24px);
@@ -360,8 +371,7 @@ h2 {
   background: #e9dac9;
 }
 
-.overall-chart-empty p,
-.project-chart-empty p {
+.overall-chart-empty p {
   position: relative;
   margin: 0;
   padding: 7px 11px;
@@ -588,50 +598,6 @@ h2 {
   margin-bottom: 5px;
 }
 
-.project-chart-empty {
-  position: relative;
-  display: grid;
-  min-height: 165px;
-  align-content: end;
-  justify-items: center;
-  margin-top: 16px;
-  overflow: hidden;
-  border-bottom: 1px solid #bd8076;
-}
-
-.chart-baseline {
-  position: absolute;
-  bottom: 4px;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: #e7d5c5;
-}
-
-.project-chart-empty p {
-  margin-bottom: 43px;
-}
-
-.session-history-empty {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 18px;
-  margin-top: 43px;
-  padding-top: 21px;
-  border-top: 1px dashed #d8b9a4;
-}
-
-.session-history-empty .eyebrow {
-  margin-bottom: 4px;
-}
-
-.session-history-empty > p {
-  margin: 0;
-  color: #a1847a;
-  font-size: 12px;
-}
-
 .not-found-state {
   display: grid;
   min-height: 380px;
@@ -659,6 +625,244 @@ h2 {
   border-radius: 50%;
   background: #6d6348;
 }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Activity charts */
+
+.activity-chart {
+  display: block;
+  min-width: 0;
+}
+
+.activity-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chart-baseline-line {
+  stroke: #e3cdb9;
+  stroke-width: 1;
+}
+
+.chart-line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-decorative-bar {
+  fill: #f4e4d1;
+}
+
+.activity-chart-row {
+  grid-area: spark;
+  align-self: center;
+}
+
+.activity-chart-row .chart-line {
+  stroke: #d8695c;
+  stroke-width: 2;
+}
+
+.activity-chart-row .chart-marker {
+  fill: #d8695c;
+}
+
+.activity-chart-detail,
+.activity-chart-overall {
+  position: relative;
+  margin: 16px 0 0;
+}
+
+.activity-chart-detail .chart-line {
+  stroke: var(--ink);
+  stroke-width: 3.5;
+}
+
+.activity-chart-detail .chart-marker {
+  fill: #d8695c;
+  stroke: var(--paper);
+  stroke-width: 1.5;
+}
+
+.activity-chart-overall .chart-line {
+  stroke: var(--ink);
+  stroke-width: 4;
+}
+
+.activity-chart-overall .chart-marker {
+  fill: var(--ink);
+  stroke: var(--paper);
+  stroke-width: 2.5;
+}
+
+.chart-peak {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.chart-axis span:only-child {
+  margin-left: auto;
+}
+
+.chart-note {
+  margin: 10px 0 0;
+  color: #a1847a;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Session history */
+
+.session-history {
+  margin-top: 43px;
+  padding-top: 21px;
+  border-top: 1px dashed #d8b9a4;
+}
+
+.session-history-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.session-history-header .eyebrow {
+  margin-bottom: 4px;
+}
+
+.log-session-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.session-empty {
+  margin: 0;
+  color: #a1847a;
+  font-size: 13px;
+}
+
+.session-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid #dfcbb9;
+}
+
+.session-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px 20px;
+  min-height: 52px;
+  padding: 8px 0;
+  border-bottom: 1px solid #dfcbb9;
+}
+
+.session-entry-editing {
+  display: block;
+  padding: 16px 0;
+}
+
+.session-entry-date {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.session-entry-words {
+  color: var(--ink-soft);
+  font-size: 14px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.session-actions,
+.session-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: end;
+  gap: 4px 16px;
+}
+
+.session-actions .text-button {
+  min-height: 44px;
+  padding: 0 4px;
+}
+
+.session-confirm-question {
+  color: var(--error);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.session-confirm .primary-button,
+.session-confirm .secondary-button {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.danger-button {
+  border-color: var(--error);
+  background: var(--error);
+  box-shadow: 2px 3px #d79a8e;
+}
+
+.danger-button:hover:not(:disabled) {
+  background: #8a2c2c;
+}
+
+.session-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px 20px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 1px solid #e6d3c1;
+  border-radius: 3px;
+  background: #fffaf2;
+}
+
+.session-entry-editing .session-form {
+  margin-bottom: 0;
+}
+
+.session-form .form-actions,
+.session-form .form-error-summary {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+
 
 @media (max-width: 780px) {
   .app-frame {
@@ -692,19 +896,27 @@ h2 {
     box-shadow: 6px 7px 0 var(--paper-shadow);
   }
 
-  .dashboard-columns,
   .detail-columns {
     grid-template-columns: minmax(0, 1fr);
     gap: 29px;
   }
 
+  /* Phones lead with the overall trend, then the desk heading right above the projects. */
+  .dashboard-layout {
+    grid-template-areas:
+      'overall'
+      'top'
+      'list';
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .dashboard-topline {
-    margin-bottom: 21px;
+    margin: 27px 0 14px;
   }
 
   .overall-panel {
-    padding: 23px 0 0;
-    border-top: 1px solid #dec9b5;
+    padding: 0 0 25px;
+    border-bottom: 1px solid #dec9b5;
     border-left: 0;
   }
 
@@ -718,11 +930,7 @@ h2 {
     border-left: 0;
   }
 
-  .project-chart-empty {
-    min-height: 140px;
-  }
-
-  .session-history-empty {
+  .session-history {
     margin-top: 30px;
   }
 }
@@ -748,14 +956,22 @@ h2 {
 
   .project-row {
     min-height: 70px;
+    grid-template-areas:
+      'copy count open'
+      'spark spark spark';
     grid-template-columns: minmax(0, 1fr) auto 18px;
-    gap: 9px;
+    gap: 6px 9px;
+    border-radius: 34px;
     padding-right: 12px;
     padding-left: 15px;
   }
 
   .project-row-title {
     font-size: 15px;
+  }
+
+  .activity-chart-row {
+    width: min(100%, 180px);
   }
 
   .project-row-count {
@@ -793,9 +1009,17 @@ h2 {
     gap: 10px;
   }
 
-  .session-history-empty {
-    align-items: start;
-    flex-direction: column;
-    gap: 10px;
+  .session-entry {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .session-actions,
+  .session-confirm {
+    grid-column: 1 / -1;
+    justify-content: start;
+  }
+
+  .session-form {
+    grid-template-columns: 1fr;
   }
 }

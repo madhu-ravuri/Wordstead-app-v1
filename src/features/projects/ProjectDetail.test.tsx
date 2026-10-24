@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { createProject } from '../../domain/projects'
+import { createSession } from '../../domain/sessions'
 import { ProjectDetail } from './ProjectDetail'
 
 const project = createProject(
@@ -21,6 +22,11 @@ describe('ProjectDetail', () => {
     render(
       <ProjectDetail
         project={project}
+        sessions={[]}
+        today="2026-10-23"
+        onLogSession={vi.fn()}
+        onUpdateSession={vi.fn()}
+        onDeleteSession={vi.fn()}
         onBack={vi.fn()}
         onSave={vi.fn().mockResolvedValue(undefined)}
         storageUnavailable={false}
@@ -33,8 +39,8 @@ describe('ProjectDetail', () => {
     expect(notesRow).not.toBeNull()
     expect(within(notesRow!).getByText('Keep the ending gentle.')).toBeInTheDocument()
     expect(screen.getByText('2,350')).toBeInTheDocument()
-    expect(screen.getByText('No sessions recorded')).toBeInTheDocument()
-    expect(screen.getByRole('img', { name: 'No writing sessions recorded for this project' })).toBeInTheDocument()
+    expect(screen.getByText(/No sessions recorded yet/)).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /^Daily words for A Story With Notes\. No writing sessions/ })).toBeInTheDocument()
   })
 
   it('opens the edit form from the pencil control', async () => {
@@ -42,6 +48,11 @@ describe('ProjectDetail', () => {
     render(
       <ProjectDetail
         project={project}
+        sessions={[]}
+        today="2026-10-23"
+        onLogSession={vi.fn()}
+        onUpdateSession={vi.fn()}
+        onDeleteSession={vi.fn()}
         onBack={vi.fn()}
         onSave={vi.fn().mockResolvedValue(undefined)}
         storageUnavailable={false}
@@ -59,6 +70,11 @@ describe('ProjectDetail', () => {
     render(
       <ProjectDetail
         project={project}
+        sessions={[]}
+        today="2026-10-23"
+        onLogSession={vi.fn()}
+        onUpdateSession={vi.fn()}
+        onDeleteSession={vi.fn()}
         onBack={vi.fn()}
         onSave={onSave}
         storageUnavailable={false}
@@ -89,5 +105,30 @@ describe('ProjectDetail', () => {
       notes: 'New notes',
     })
     expect(await screen.findByRole('button', { name: 'Edit project' })).toBeInTheDocument()
+  })
+
+  it('adds session words to the total and dates last edited by the latest session log', () => {
+    const sessions = [
+      createSession('detail-project', { wordCount: 400, date: '2026-10-10' }, 's1', '2026-10-25T12:00:00.000Z'),
+      createSession('detail-project', { wordCount: 250, date: '2026-10-24' }, 's2', '2026-10-24T12:00:00.000Z'),
+    ]
+    render(
+      <ProjectDetail
+        project={project}
+        sessions={sessions}
+        today="2026-10-26"
+        onLogSession={vi.fn()}
+        onUpdateSession={vi.fn()}
+        onDeleteSession={vi.fn()}
+        onBack={vi.fn()}
+        onSave={vi.fn().mockResolvedValue(undefined)}
+        storageUnavailable={false}
+      />,
+    )
+
+    expect(screen.getByText('3,000')).toBeInTheDocument()
+    // Backdated session logged on Oct 25 sets the last-edited date, not its Oct 10 activity date.
+    expect(screen.getByText('Date last edited').nextElementSibling).toHaveTextContent('Oct 25, 2026')
+    expect(screen.getByRole('img', { name: /250 words written from .+, on 1 of 7 days/ })).toBeInTheDocument()
   })
 })
