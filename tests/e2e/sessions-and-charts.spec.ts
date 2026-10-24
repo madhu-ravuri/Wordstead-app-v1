@@ -30,6 +30,10 @@ function metadataValue(page: Page, term: string) {
   return page.locator('.project-metadata > div').filter({ has: page.getByText(term, { exact: true }) }).locator('dd')
 }
 
+function sessionStatus(page: Page) {
+  return page.locator('.session-history').getByRole('status')
+}
+
 function sessionEntries(page: Page) {
   return page.locator('.session-list > li')
 }
@@ -122,7 +126,7 @@ test('correcting and deleting a session recalculates totals and charts', async (
   await page.getByLabel('Words written', { exact: true }).fill('260')
   await page.getByLabel('Date written', { exact: true }).fill('2026-10-23')
   await page.getByRole('button', { name: 'Save session' }).click()
-  await expect(page.getByRole('status')).toContainText('Updated the session to 260 words on Oct 23, 2026.')
+  await expect(sessionStatus(page)).toContainText('Updated the session to 260 words on Oct 23, 2026.')
 
   await expect(metadataValue(page, 'Word count')).toHaveText('1,560')
   // The earliest session is now Oct 22, so this young project's range starts there.
@@ -292,7 +296,7 @@ test('sessions can be logged, corrected, and deleted with the keyboard alone', a
   await expect(page.getByRole('button', { name: 'Delete', exact: true })).toBeFocused()
   await page.keyboard.press('Enter')
   await expect(sessionEntries(page)).toHaveCount(0)
-  await expect(page.getByRole('status')).toHaveText('Deleted the Oct 23, 2026 session.')
+  await expect(sessionStatus(page)).toHaveText('Deleted the Oct 23, 2026 session.')
   await expect(logButton).toBeFocused()
 })
 
@@ -321,4 +325,41 @@ test('phones stack the overall chart, then the desk heading, then projects; desk
   expect(desk.y + desk.height).toBeLessThan(daily.y)
   expect(desk.y + desk.height).toBeLessThan(projects.y)
   expect(daily.x).toBeGreaterThan(projects.x + projects.width)
+})
+
+test('project rows stack a full-width title, then sparkline and count, then a full-width edit date', async ({ page }) => {
+  await createProject(page, 'Row layout draft with a fairly long working title', '1200')
+  await logSession(page, '300', '2026-10-21')
+  await page.getByRole('button', { name: 'All projects' }).click()
+
+  const row = page.locator('.project-row').first()
+  for (const width of [1440, 375]) {
+    await page.setViewportSize({ width, height: 900 })
+    const [rowBox, title, spark, count, date] = await Promise.all(
+      [row, row.locator('.project-row-title'), row.locator('.activity-chart-row'), row.locator('.project-row-count'), row.locator('.project-row-date')].map(
+        async (locator) => (await locator.boundingBox())!,
+      ),
+    )
+    expect(title.y + title.height).toBeLessThanOrEqual(spark.y)
+    expect(title.y + title.height).toBeLessThanOrEqual(count.y)
+    expect(spark.y + spark.height).toBeLessThanOrEqual(date.y)
+    expect(count.y + count.height).toBeLessThanOrEqual(date.y)
+    // Title and date bands span the row's content width, not a narrow column.
+    expect(title.width).toBeGreaterThan(rowBox.width * 0.7)
+    expect(date.width).toBeGreaterThan(rowBox.width * 0.7)
+  }
+})
+
+test('Log session sits in the top toolbar beside the edit button on desktop and phone', async ({ page }) => {
+  await createProject(page, 'Toolbar draft')
+  for (const width of [1440, 375]) {
+    await page.setViewportSize({ width, height: 800 })
+    const log = (await page.getByRole('button', { name: 'Log session' }).boundingBox())!
+    const edit = (await page.getByRole('button', { name: 'Edit project' }).boundingBox())!
+    const heading = (await page.getByRole('heading', { name: 'Toolbar draft' }).boundingBox())!
+    expect(log.x + log.width).toBeLessThanOrEqual(edit.x)
+    expect(Math.abs(log.y + log.height / 2 - (edit.y + edit.height / 2))).toBeLessThan(4)
+    expect(log.y + log.height).toBeLessThan(heading.y)
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0)
 })

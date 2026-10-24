@@ -144,8 +144,13 @@ test('project detail pencil control receives visible keyboard focus', async ({ p
   await expect(page.getByRole('heading', { name: 'Keyboard focus draft' })).toBeVisible()
 
   const backButton = page.getByRole('button', { name: 'All projects' })
+  const logButton = page.getByRole('button', { name: 'Log session' })
   const editButton = page.getByRole('button', { name: 'Edit project' })
   await backButton.focus()
+  // Toolbar order: back link, then Log session beside the pencil.
+  await page.keyboard.press('Tab')
+  await expect(logButton).toBeFocused()
+  await expect(logButton).toHaveCSS('outline-style', 'solid')
   await page.keyboard.press('Tab')
   await expect(editButton).toBeFocused()
   await expect(editButton).toHaveCSS('outline-style', 'solid')

@@ -33,13 +33,9 @@ function ProjectRow({
   const series = getProjectSeries(project, sessions, today)
 
   return (
+    // Three bands: full-width title, then sparkline with word count, then full-width edit date.
     <button className="project-row" type="button" onClick={onOpen}>
-      <span className="project-row-copy">
-        <span className="project-row-title">{project.title}</span>
-        <span className="project-row-date">
-          Edited {formatCalendarDate(getLocalCalendarDate(getLastEditedAt(project, sessions)))}
-        </span>
-      </span>
+      <span className="project-row-title">{project.title}</span>
       <ActivityChart points={series} variant="row" />
       <span className="visually-hidden">{describeSeries(series)}</span>
       <span className="project-row-count">
@@ -47,6 +43,9 @@ function ProjectRow({
         <small>words</small>
       </span>
       <span className="project-row-open" aria-hidden="true"><ArrowUpRight size={18} /></span>
+      <span className="project-row-date">
+        Edited {formatCalendarDate(getLocalCalendarDate(getLastEditedAt(project, sessions)))}
+      </span>
     </button>
   )
 }

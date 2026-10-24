@@ -143,11 +143,11 @@ npm run build
 
 ### Manual completion checklist
 
-- [ ] Complete a project and verify it leaves active projects, appears in completed projects, and retains total/history. **§5.6 AC 1; §5.7 AC 4**
-- [ ] Reopen it and verify it returns to active projects without adding chart activity. **§5.6 AC 2, 4**
-- [ ] Attempt to log while complete; verify the project must be reopened first. **§7 Assumption 4; §5.3 AC 1**
-- [ ] Cancel a delete confirmation and verify no data or chart values change. **§5.6 AC 5, 7**
-- [ ] Confirm deletion and verify the project is hidden, retained data remains stored, and overall historical values remain unchanged. **§5.6 AC 5, 6; §5.5 AC 1, 6**
+- [x] Complete a project and verify it leaves active projects, appears in completed projects, and retains total/history. **§5.6 AC 1; §5.7 AC 4**
+- [x] Reopen it and verify it returns to active projects without adding chart activity. **§5.6 AC 2, 4**
+- [x] Attempt to log while complete; verify the project must be reopened first. **§7 Assumption 4; §5.3 AC 1**
+- [x] Cancel a delete confirmation and verify no data or chart values change. **§5.6 AC 5, 7**
+- [x] Confirm deletion and verify the project is hidden, retained data remains stored, and overall historical values remain unchanged. **§5.6 AC 5, 6; §5.5 AC 1, 6**
 
 ## Phase 4: Complete Data Backup and Restore
 

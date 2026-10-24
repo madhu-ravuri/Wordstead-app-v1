@@ -2,8 +2,6 @@ import { isLocalDate } from './dates'
 
 export const MAX_WORD_COUNT = 1_000_000
 
-export type ProjectStatus = 'active' | 'completed' | 'deleted'
-
 export interface Project {
   id: string
   title: string

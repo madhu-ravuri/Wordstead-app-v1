@@ -3,8 +3,14 @@ import { BookOpenText } from 'lucide-react'
 import { WordsteadRepository } from './data/database'
 import { getTodayLocalDate } from './domain/dates'
 import {
+  canChangeSessions,
+  completeProject,
+  getVisibleProjects,
+  reopenProject,
+  softDeleteProject,
+} from './domain/projectLifecycle'
+import {
   createProject,
-  sortByLastEdited,
   updateProject,
   type Project,
   type ProjectFields,
@@ -35,6 +41,7 @@ function App() {
   const [today, setToday] = useState(getTodayLocalDate)
   const [isLoading, setIsLoading] = useState(true)
   const [storageError, setStorageError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   useEffect(() => {
     const store = new WordsteadRepository()
@@ -77,7 +84,11 @@ function App() {
   }, [])
 
   useEffect(() => {
-    const handleHashChange = () => setRoute(readRoute())
+    const handleHashChange = () => {
+      const nextRoute = readRoute()
+      setRoute(nextRoute)
+      if (nextRoute.page !== 'dashboard') setNotice(null)
+    }
     window.addEventListener('hashchange', handleHashChange)
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
@@ -95,15 +106,39 @@ function App() {
     navigate(`/project/${encodeURIComponent(project.id)}`)
   }
 
-  const handleUpdate = async (project: Project, fields: ProjectFields) => {
-    const updatedProject = updateProject(project, fields)
+  const saveProjectChange = async (updatedProject: Project, notSavedMessage: string) => {
     const store = repository.current
-    if (!store) throw new Error('Browser storage is not ready. Your changes were not saved.')
+    if (!store) throw new Error(`Browser storage is not ready. ${notSavedMessage}`)
     await store.saveProject(updatedProject)
-    setProjects((current) => current.map((item) => (item.id === project.id ? updatedProject : item)))
+    setProjects((current) => current.map((item) => (item.id === updatedProject.id ? updatedProject : item)))
+  }
+
+  const handleUpdate = (project: Project, fields: ProjectFields) =>
+    saveProjectChange(updateProject(project, fields), 'Your changes were not saved.')
+
+  const handleComplete = (project: Project) =>
+    saveProjectChange(completeProject(project), 'The project was not marked complete.')
+
+  const handleReopen = (project: Project) =>
+    saveProjectChange(reopenProject(project), 'The project was not reopened.')
+
+  // Soft delete: the project record and its sessions stay stored and keep counting overall.
+  const handleDeleteProject = async (project: Project) => {
+    await saveProjectChange(softDeleteProject(project), 'The project was not deleted.')
+    navigate('/')
+    setNotice(`Deleted “${project.title}”. Its writing sessions still count in your overall daily words.`)
+  }
+
+  // Guard every session mutation, not just the UI: completed and deleted projects are read-only.
+  const assertSessionsEditable = (projectId: string) => {
+    const project = projects.find((item) => item.id === projectId)
+    if (!project || !canChangeSessions(project)) {
+      throw new Error('Reopen this project before changing its sessions.')
+    }
   }
 
   const handleLogSession = async (project: Project, fields: SessionFields) => {
+    assertSessionsEditable(project.id)
     const session = createSession(project.id, fields)
     const store = repository.current
     if (!store) throw new Error('Browser storage is not ready. Your session was not saved.')
@@ -112,6 +147,7 @@ function App() {
   }
 
   const handleUpdateSession = async (session: WritingSession, fields: SessionFields) => {
+    assertSessionsEditable(session.projectId)
     const updatedSession = updateSession(session, fields)
     const store = repository.current
     if (!store) throw new Error('Browser storage is not ready. Your changes were not saved.')
@@ -120,20 +156,14 @@ function App() {
   }
 
   const handleDeleteSession = async (session: WritingSession) => {
+    assertSessionsEditable(session.projectId)
     const store = repository.current
     if (!store) throw new Error('Browser storage is not ready. The session was not deleted.')
     await store.deleteSession(session.id)
     setSessions((current) => current.filter((item) => item.id !== session.id))
   }
 
-  const activeProjects = sortByLastEdited(
-    projects.filter((project) => !project.deletedAt && !project.completedAt),
-    sessions,
-  )
-  const completedProjects = sortByLastEdited(
-    projects.filter((project) => !project.deletedAt && project.completedAt),
-    sessions,
-  )
+  const { active: activeProjects, completed: completedProjects } = getVisibleProjects(projects, sessions)
   const selectedProject = route.page === 'project'
     ? projects.find((project) => project.id === route.id && !project.deletedAt)
     : undefined
@@ -177,6 +207,9 @@ function App() {
               onLogSession={(fields) => handleLogSession(selectedProject, fields)}
               onUpdateSession={handleUpdateSession}
               onDeleteSession={handleDeleteSession}
+              onComplete={() => handleComplete(selectedProject)}
+              onReopen={() => handleReopen(selectedProject)}
+              onDelete={() => handleDeleteProject(selectedProject)}
               storageUnavailable={Boolean(storageError)}
             />
           ) : (
@@ -188,6 +221,14 @@ function App() {
         </main>
       ) : (
         <main className="paper dashboard-paper">
+          {notice && (
+            <p className="app-notice" role="status">
+              <span>{notice}</span>
+              <button className="text-button" type="button" onClick={() => setNotice(null)}>
+                Dismiss
+              </button>
+            </p>
+          )}
           <Dashboard
             activeProjects={activeProjects}
             completedProjects={completedProjects}

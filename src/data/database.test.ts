@@ -79,6 +79,43 @@ describe('WordsteadRepository', () => {
     await reopened.close()
   })
 
+  it('retains a soft-deleted project and its sessions, and persists status changes', async () => {
+    const repository = createRepository()
+    const project = {
+      id: 'project-1',
+      title: 'Retired draft',
+      startingWordCount: 0,
+      deadline: null,
+      synopsis: null,
+      notes: null,
+      createdAt: '2026-10-01T12:00:00.000Z',
+      updatedAt: '2026-10-01T12:00:00.000Z',
+      completedAt: null,
+      deletedAt: null,
+    }
+    const session = {
+      id: 'session-1',
+      projectId: 'project-1',
+      date: '2026-10-20',
+      wordCount: 500,
+      createdAt: '2026-10-20T12:00:00.000Z',
+      updatedAt: '2026-10-20T12:00:00.000Z',
+    }
+    await repository.saveProject(project)
+    await repository.saveSession(session)
+
+    const completed = { ...project, completedAt: '2026-10-22T12:00:00.000Z', updatedAt: '2026-10-22T12:00:00.000Z' }
+    await repository.saveProject(completed)
+    const deleted = { ...completed, deletedAt: '2026-10-23T12:00:00.000Z', updatedAt: '2026-10-23T12:00:00.000Z' }
+    await repository.saveProject(deleted)
+    await repository.close()
+
+    const reopened = new WordsteadRepository(databaseNames[databaseNames.length - 1])
+    await expect(reopened.listProjects()).resolves.toEqual([deleted])
+    await expect(reopened.listSessions()).resolves.toEqual([session])
+    await reopened.close()
+  })
+
   it('reports a failed session write without claiming success', async () => {
     const repository = createRepository()
     await repository.listSessions()

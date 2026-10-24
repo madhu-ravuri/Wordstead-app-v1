@@ -154,3 +154,31 @@ Verification at completion: unit 89/89, E2E 20/20 (stable over three consecutive
   - **Fix:** The user decided the project chart always caps at 7 days. `getProjectChartRange` now starts at the later of (today − 6) and the earlier of creation/earliest session. Updated the unit, component, and E2E tests, including a backdated session inside the window and one older than it (counted in the total and the overall chart, but outside the project chart).
   - **Spec change needed:** Yes. Updated `SPEC.md` §5.4 AC 4, the §6 backdated-session edge case, and §7 assumption 8.
 
+## 2026-10-23 — Phase 3: Completion, reopening, and retained deletion history
+
+Verification at completion: unit 101/101, E2E 28/28 (stable over three consecutive runs), and lint, typecheck, and build all pass. The plan's targeted Phase 3 commands also pass (8 domain tests, 7 lifecycle E2E tests). The E2E tests read IndexedDB directly to confirm soft-deleted projects and their sessions are still stored. Manual checklist walked in Chromium at 1440×900 and 375×740.
+
+- **Phase:** Phase 3
+  - **What went wrong:** jsdom doesn't implement `HTMLDialogElement.showModal()`, which the delete confirmation uses.
+  - **How it was caught:** A probe test before building the dialog.
+  - **Fix:** Kept the native modal `<dialog>` (browsers provide focus containment, an inert background, and Escape to close). Added a minimal `showModal`/`close` stand-in in `src/test/setup.ts` for unit tests only. Real dialog behavior is covered in Playwright.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 3
+  - **What went wrong:** The project detail view now has two polite status regions (project actions and session history). Unscoped `getByRole('status')` lookups in one component test and two Phase 2 E2E tests became ambiguous.
+  - **How it was caught:** A strict-mode failure in `ProjectDetail.test.tsx`, plus review of the existing E2E tests.
+  - **Fix:** Session-status lookups in E2E are scoped to `.session-history`. The component test checks for message text instead.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 3
+  - **What went wrong:** The first focus-trap E2E test expected Tab to stay inside the dialog forever. In a native modal dialog, Chrome moves focus from the last control to the browser's own UI (reported as `<body>`), which is correct behavior.
+  - **How it was caught:** A failing assertion in `the delete dialog keeps keyboard focus inside until it closes`.
+  - **Fix:** The test now asserts that focus never reaches page content behind the dialog, that both dialog buttons are reachable, and that Escape returns focus to the Delete button. To make that last part work, the dialog is now closed with `dialog.close()` before React unmounts it.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 3
+  - **What went wrong:** Three judgment calls where the spec is silent or ambiguous. (1) §5.7 AC 4 says the completed section "allows opening and reopening" projects; reopening is offered on the project's page, not as a separate button in the list. (2) Sessions of a completed project can still be corrected or deleted; only adding new sessions requires reopening (§7 assumption 4). (3) Completing or reopening counts as a status edit under §4, so it updates "date last edited" and moves the project to the top of its list.
+  - **How it was caught:** Implementation review against SPEC.md.
+  - **Fix:** The user decided: (1) keep reopening on the completed project's page only; (2) a completed project's sessions are read-only until it is reopened. This was changed: Edit and Delete are hidden, the note reads "Reopen it to log, correct, or delete sessions", and App's session handlers also refuse changes to non-active projects via `canChangeSessions`. (3) Keep status changes updating "date last edited". Covered by domain, component, and E2E tests.
+  - **Spec change needed:** Yes. Updated `SPEC.md` §5.3 AC 6, §5.6 AC 4, §5.7 AC 4, and §7 assumption 4.
+

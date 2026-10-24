@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { useState } from 'react'
 import { formatCalendarDate } from '../../domain/dates'
 import type { WritingSession } from '../../domain/projects'
 import { sortSessionHistory, type SessionFields } from '../../domain/sessions'
@@ -8,14 +7,20 @@ import { SessionForm } from './SessionForm'
 interface SessionHistoryProps {
   sessions: readonly WritingSession[]
   today: string
-  canLog: boolean
+  /** False for completed projects: sessions are read-only until the project is reopened. */
+  canChangeSessions: boolean
+  /** Explains why sessions are read-only. */
+  readOnlyMessage?: string
+  /** The log form is opened from the page toolbar; this section renders it. */
+  isLogging: boolean
+  onLogClose: () => void
+  /** Called after a deletion removes the focused row, so focus can be restored. */
+  onSessionRemoved?: () => void
   onLog: (fields: SessionFields) => Promise<void>
   onUpdate: (session: WritingSession, fields: SessionFields) => Promise<void>
   onDelete: (session: WritingSession) => Promise<void>
   storageUnavailable: boolean
 }
-
-type Editor = { mode: 'new' } | { mode: 'edit'; id: string } | null
 
 function formatWords(count: number): string {
   return `${new Intl.NumberFormat().format(count)} ${count === 1 ? 'word' : 'words'}`
@@ -24,29 +29,29 @@ function formatWords(count: number): string {
 export function SessionHistory({
   sessions,
   today,
-  canLog,
+  canChangeSessions,
+  readOnlyMessage,
+  isLogging,
+  onLogClose,
+  onSessionRemoved,
   onLog,
   onUpdate,
   onDelete,
   storageUnavailable,
 }: SessionHistoryProps) {
-  const [editor, setEditor] = useState<Editor>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [status, setStatus] = useState('')
-  const logButton = useRef<HTMLButtonElement>(null)
-  const wasLogging = useRef(false)
   const history = sortSessionHistory(sessions)
+  // Only one session form at a time: opening the log form supersedes an in-progress edit.
+  const showLogForm = isLogging && canChangeSessions
+  const activeEditId = showLogForm || !canChangeSessions ? null : editingId
 
-  // Return focus to "Log session" when its form closes.
-  useEffect(() => {
-    if (wasLogging.current && editor === null) logButton.current?.focus()
-    wasLogging.current = editor?.mode === 'new'
-  }, [editor])
-
-  const openEditor = (next: Editor) => {
-    setEditor(next)
+  const openEdit = (id: string | null) => {
+    if (showLogForm) onLogClose()
+    setEditingId(id)
     setConfirmingDeleteId(null)
     setDeleteError(null)
     setStatus('')
@@ -59,8 +64,7 @@ export function SessionHistory({
       await onDelete(session)
       setConfirmingDeleteId(null)
       setStatus(`Deleted the ${formatCalendarDate(session.date)} session.`)
-      // The focused row is gone; keep keyboard users in the session area.
-      logButton.current?.focus()
+      onSessionRemoved?.()
     } catch (error) {
       setDeleteError(error instanceof Error ? error.message : 'This session could not be deleted.')
     } finally {
@@ -71,34 +75,21 @@ export function SessionHistory({
   return (
     <section className="session-history" aria-labelledby="session-history-heading">
       <div className="session-history-header">
-        <div>
-          <p className="eyebrow">The pages so far</p>
-          <h2 id="session-history-heading">Writing sessions</h2>
-        </div>
-        {canLog && editor?.mode !== 'new' && (
-          <button
-            ref={logButton}
-            className="primary-button log-session-button"
-            type="button"
-            onClick={() => openEditor({ mode: 'new' })}
-            disabled={storageUnavailable}
-          >
-            <Plus size={16} strokeWidth={2.4} aria-hidden="true" />
-            Log session
-          </button>
-        )}
+        <p className="eyebrow">The pages so far</p>
+        <h2 id="session-history-heading">Writing sessions</h2>
       </div>
 
+      {!canChangeSessions && readOnlyMessage && <p className="session-log-note">{readOnlyMessage}</p>}
       <p className="visually-hidden" role="status">{status}</p>
       {deleteError && <p className="form-error form-error-summary" role="alert">{deleteError}</p>}
 
-      {editor?.mode === 'new' && (
+      {showLogForm && (
         <SessionForm
           today={today}
-          onCancel={() => setEditor(null)}
+          onCancel={onLogClose}
           onSubmit={async (fields) => {
             await onLog(fields)
-            setEditor(null)
+            onLogClose()
             setStatus(`Logged ${formatWords(fields.wordCount)} for ${formatCalendarDate(fields.date)}.`)
           }}
           storageUnavailable={storageUnavailable}
@@ -106,10 +97,10 @@ export function SessionHistory({
       )}
 
       {history.length === 0 ? (
-        editor?.mode !== 'new' && (
+        !showLogForm && (
           <p className="session-empty">
             No sessions recorded yet.
-            {canLog && ' Log your first session to start this project’s chart.'}
+            {canChangeSessions && ' Log your first session to start this project’s chart.'}
           </p>
         )
       ) : (
@@ -118,16 +109,16 @@ export function SessionHistory({
             const date = formatCalendarDate(session.date)
             const words = formatWords(session.wordCount)
 
-            if (editor?.mode === 'edit' && editor.id === session.id) {
+            if (activeEditId === session.id) {
               return (
                 <li key={session.id} className="session-entry session-entry-editing">
                   <SessionForm
                     session={session}
                     today={today}
-                    onCancel={() => setEditor(null)}
+                    onCancel={() => setEditingId(null)}
                     onSubmit={async (fields) => {
                       await onUpdate(session, fields)
-                      setEditor(null)
+                      setEditingId(null)
                       setStatus(`Updated the session to ${formatWords(fields.wordCount)} on ${formatCalendarDate(fields.date)}.`)
                     }}
                     storageUnavailable={storageUnavailable}
@@ -140,7 +131,7 @@ export function SessionHistory({
               <li key={session.id} className="session-entry">
                 <span className="session-entry-date">{date}</span>
                 <span className="session-entry-words">{words}</span>
-                {confirmingDeleteId === session.id ? (
+                {!canChangeSessions ? null : confirmingDeleteId === session.id ? (
                   <div className="session-confirm" role="group" aria-label={`Delete the ${date} session of ${words}?`}>
                     <span className="session-confirm-question">Delete this session?</span>
                     <button
@@ -167,7 +158,7 @@ export function SessionHistory({
                       className="text-button"
                       type="button"
                       aria-label={`Edit session on ${date}, ${words}`}
-                      onClick={() => openEditor({ mode: 'edit', id: session.id })}
+                      onClick={() => openEdit(session.id)}
                       disabled={storageUnavailable}
                     >
                       Edit
@@ -177,7 +168,7 @@ export function SessionHistory({
                       type="button"
                       aria-label={`Delete session on ${date}, ${words}`}
                       onClick={() => {
-                        openEditor(null)
+                        openEdit(null)
                         setConfirmingDeleteId(session.id)
                       }}
                       disabled={storageUnavailable}

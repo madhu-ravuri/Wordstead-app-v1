@@ -19,6 +19,8 @@
 
   --ink: #542c32;
   --ink-soft: #79535a;
+  /* Chart lines: the + button's hue, brightened so thin strokes read as cherry, not black. */
+  --cherry: #8e2c3d;
   --coral: #df8c7d;
   --coral-dark: #c96e64;
   --paper: #fff5e7;

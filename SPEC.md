@@ -6,7 +6,7 @@ Wordstead is a local-first writing progress tracker for people working on multip
 
 The product is a responsive static web application suitable for free hosting on GitHub Pages. The supplied `mockup.png` is the visual source of truth for the dashboard, and `project page mockup.png` is the visual source of truth for the individual project view. Other screens extend the visual language of these references without changing their core hierarchy.
 
-**Approved layout deviation (Phase 1 review):** The app uses a "postcard" composition: the masthead sits above a single cream paper panel on the coral field, and the overall chart (dashboard) and project sparkline (project detail) sit inside that panel, to the right of the project content on wide layouts, rather than on the coral field outside it as drawn in the mockups. The mockups remain the reference for palette, typography character, pill treatments, chart styling, and information hierarchy.
+**Approved layout deviation (Phase 1 review):** The app uses a "postcard" composition: the masthead sits above a single cream paper panel on the coral field, and the overall chart (dashboard) and project sparkline (project detail) sit inside that panel, to the right of the project content on wide layouts, rather than on the coral field outside it as drawn in the mockups. Dashboard project rows are rounded cards with three bands (a full-width title; the sparkline beside the word count; a full-width "date last edited") instead of the mockup's single-line pills. The project-detail and overall chart lines use a brighter cherry (`#8e2c3d`) derived from the `+` button's color, so thin strokes don't read as black. The mockups remain the reference for palette, typography character, pill treatments, chart styling, and information hierarchy.
 
 ### Recommended technology
 
@@ -129,7 +129,7 @@ The storage format must be versioned so future releases can migrate backups and 
 
 **AC 5.** Saving a session increases the project total by its word count and increases that date's project and overall daily activity by the same amount.
 
-**AC 6.** A user can edit or delete an individual session from project detail. Editing its date or count recalculates the owning project's total and the affected project/overall daily activity. Deleting it subtracts its contribution from those values.
+**AC 6.** A user can edit or delete an individual session from an active project's detail view. A completed project's sessions are read-only (shown without edit or delete actions) until the project is reopened. Editing its date or count recalculates the owning project's total and the affected project/overall daily activity. Deleting it subtracts its contribution from those values.
 
 **AC 7.** Multiple sessions for one project on the same day appear as separate records in session history and are summed for chart points.
 
@@ -177,7 +177,7 @@ The storage format must be versioned so future releases can migrate backups and 
 
 **AC 3.** Completed projects continue contributing session activity to the overall chart.
 
-**AC 4.** Completing or reopening a project does not create writing-session activity.
+**AC 4.** Completing or reopening a project does not create writing-session activity. Each counts as a status edit, so it updates the project's date last edited (and therefore its position in its list).
 
 **AC 5.** Deleting a project requires an explicit confirmation step that identifies the project and explains that its session history remains in overall totals/backup data.
 
@@ -193,7 +193,7 @@ The storage format must be versioned so future releases can migrate backups and 
 
 **AC 3.** The detail view provides project edit, log-session, complete/reopen, and delete actions appropriate to the project's state.
 
-**AC 4.** A separate completed-projects section lists completed, non-deleted projects and allows opening and reopening them.
+**AC 4.** A separate completed-projects section lists completed, non-deleted projects and allows opening them; a completed project is reopened from its own detail view, not from the list.
 
 **AC 4a.** The active and completed sections each list projects by date last edited (§4), most recent first.
 
@@ -266,7 +266,7 @@ The storage format must be versioned so future releases can migrate backups and 
 1. Sessions remain separate records even when they share a project and date. Daily charts sum them. This preserves the requested ability to edit/delete an individual session.
 2. Session dates are local calendar dates, not timestamps chosen by the user. The session form defaults to today and permits earlier dates; future-dated sessions are not offered in the initial version.
 3. Project and session metadata use local device time. “Date last edited” compares the calendar date of the most recent project-field/status edit with the latest session log date (`createdAt`), not the session activity date; correcting a session does not change its log date.
-4. Completed projects continue to count in the overall chart. A completed project must be reopened before adding another session.
+4. Completed projects continue to count in the overall chart. A completed project must be reopened before adding, correcting, or deleting a session.
 5. Deleted projects are soft-deleted and retained in storage and backups. A deleted-project archive UI is deferred; retained deleted sessions cannot be corrected through the initial UI.
 6. Merge import deduplicates stable identifiers. If the same identifier has differing content, the user chooses which version to keep for that conflict; cancellation makes no changes.
 7. The project sparkline's seven-day window includes today and the six preceding local calendar dates. The overall chart's 30-day window includes today and the 29 preceding dates.
