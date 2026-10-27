@@ -244,3 +244,9 @@ Verification so far: unit 149/149; E2E 46/46 (138/138 over three full repeats, p
   - **Fix:** Added `npm run test:e2e:prod` (`playwright.prod.config.ts`). It builds and serves `dist/` from the `/Wordstead-app-v1/` subpath and verifies: only GET requests for the app's own assets (no backend, analytics, or font CDNs); no 4xx/5xx responses; a direct project link survives a refresh; core workflows work offline after load; and bundled fonts and favicon load from the subpath. A scan of `dist/` finds only XML namespace identifiers and React's error-doc link text, neither of which is fetched. Added `.github/workflows/deploy.yml` (all checks on every push and PR; deploys `dist/` to Pages from `master`).
   - **Spec change needed:** No.
 
+- **Phase:** Phase 5
+  - **What went wrong:** Nothing failed. This records the release check of the deployed site.
+  - **How it was caught:** After pushing `316a589`, the GitHub Actions run 40442607109 passed its test, build, and deploy jobs. A Playwright script then ran against `https://madhu-ravuri.github.io/Wordstead-app-v1/` in a desktop (1440×900) and a Pixel 7 profile. All 22 checks passed: 200 response and correct title; create a project and log a session; a direct `#/project/<id>` link loads and survives a refresh; no requests outside `madhu-ravuri.github.io` and only GET requests; no failed responses; bundled Fraunces and DM Sans fonts load; workflows keep working with the network off after load; and no horizontal scrolling.
+  - **Fix:** None needed. The deployed-URL checklist item is ticked. The only remaining release gate is a manual screen-reader pass (VoiceOver) by the user.
+  - **Spec change needed:** No.
+

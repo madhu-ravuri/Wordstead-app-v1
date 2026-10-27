@@ -221,7 +221,7 @@ npm run build
 - [x] Complete create, edit, log, correct, delete-session, complete, reopen, delete-project, export, and import workflows at desktop and phone sizes. **§5.2 AC 1-8; §5.3 AC 1-8; §5.6 AC 1-7; §5.8 AC 1-8**
 - [x] Use keyboard only through navigation, forms, chart descriptions, confirmation, and import controls; confirm visible focus and usable accessible names. **§5.7 AC 7; §5.9 AC 6**
 - [x] Inspect empty, invalid-input, storage-error, and import-error states. **§5.1 AC 1, 2; §5.2 AC 3, 4; §5.5 AC 7; §6**
-- [ ] Test the deployed GitHub Pages URL on phone and desktop, including direct navigation/refresh on a project detail route. **§1; §5.9 AC 5, 7**
+- [x] Test the deployed GitHub Pages URL on phone and desktop, including direct navigation/refresh on a project detail route. **§1; §5.9 AC 5, 7**
 - [x] Confirm no login is requested, no user content is sent to a server, and the UI indicates data is local to this browser/device. **§5.1 AC 1, 4**
 
 ## Release Gate
