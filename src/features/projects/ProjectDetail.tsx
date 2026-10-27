@@ -54,6 +54,8 @@ export function ProjectDetail({
   const [isLogging, setIsLogging] = useState(false)
   const logButton = useRef<HTMLButtonElement>(null)
   const wasLogging = useRef(false)
+  const editButton = useRef<HTMLButtonElement>(null)
+  const wasEditing = useRef(false)
   const series = getProjectSeries(project, sessions, today)
   const isCompleted = Boolean(project.completedAt)
   const sessionsEditable = canChangeSessions(project)
@@ -63,6 +65,12 @@ export function ProjectDetail({
     if (wasLogging.current && !isLogging) logButton.current?.focus()
     wasLogging.current = isLogging
   }, [isLogging])
+
+  // Return focus to the pencil button after the edit form closes.
+  useEffect(() => {
+    if (wasEditing.current && !isEditing) editButton.current?.focus()
+    wasEditing.current = isEditing
+  }, [isEditing])
 
   const changeStatus = async (action: () => Promise<void>, message: string) => {
     setIsChangingStatus(true)
@@ -85,6 +93,7 @@ export function ProjectDetail({
         onSubmit={async (fields) => {
           await onSave(fields)
           setIsEditing(false)
+          setStatusMessage('Changes saved.')
         }}
         storageUnavailable={storageUnavailable}
       />
@@ -112,6 +121,7 @@ export function ProjectDetail({
             </button>
           )}
           <button
+            ref={editButton}
             className="icon-button edit-project-button"
             type="button"
             aria-label="Edit project"

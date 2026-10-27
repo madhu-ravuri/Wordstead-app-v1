@@ -34,7 +34,7 @@
 
 .brand-caption {
   padding-bottom: 3px;
-  color: #623d42;
+  color: var(--on-coral);
   font-size: 13px;
   font-weight: 600;
 }
@@ -308,7 +308,7 @@ h2 {
 
 .quiet-empty {
   padding: 3px 0 0;
-  color: #a28a84;
+  color: var(--muted);
   font-family: var(--body);
   font-size: 13px;
   font-weight: 400;
@@ -372,7 +372,7 @@ h2 {
   margin: 0;
   padding: 7px 11px;
   background: var(--paper);
-  color: #a1847a;
+  color: var(--muted);
   font-size: 12px;
 }
 
@@ -431,7 +431,7 @@ h2 {
 .form-field input,
 .form-field textarea {
   width: 100%;
-  border: 1px solid #d9c0ad;
+  border: 1px solid var(--field-border);
   border-radius: 3px;
   padding: 11px 12px;
   background: #fffdf8;
@@ -570,6 +570,7 @@ h2 {
 
 .project-metadata > div {
   display: grid;
+  align-items: baseline;
   grid-template-columns: minmax(110px, 0.8fr) minmax(0, 1fr);
   gap: 15px;
   padding: 12px 0;
@@ -577,16 +578,19 @@ h2 {
 }
 
 .project-metadata dt {
-  color: #947774;
-  font-size: 12px;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .project-metadata dd {
   margin: 0;
   overflow-wrap: anywhere;
   color: var(--ink);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .project-metadata dd.metadata-notes {
@@ -619,17 +623,13 @@ h2 {
   justify-items: center;
   gap: 6px;
   margin-top: 24px;
-  color: #653f43;
+  color: var(--on-coral);
   font-size: 12px;
   font-weight: 600;
   text-align: center;
 }
 
 .local-note {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
   margin: 0;
 }
 
@@ -650,11 +650,11 @@ h2 {
   padding: 4px 6px;
   border: 0;
   background: transparent;
-  color: #653f43;
+  color: var(--on-coral);
   font-size: 12px;
   font-weight: 600;
   text-decoration: underline;
-  text-decoration-color: rgb(101 63 67 / 40%);
+  text-decoration-color: rgb(74 38 44 / 45%);
   text-underline-offset: 3px;
   cursor: pointer;
 }
@@ -670,9 +670,11 @@ h2 {
 }
 
 .local-indicator {
-  flex-shrink: 0;
+  display: inline-block;
   width: 7px;
   height: 7px;
+  margin-right: 8px;
+  vertical-align: 1px;
   border-radius: 50%;
   background: #6d6348;
 }
@@ -783,7 +785,7 @@ h2 {
 
 .chart-note {
   margin: 10px 0 0;
-  color: #a1847a;
+  color: var(--muted);
   font-size: 12px;
   text-align: center;
 }
@@ -812,7 +814,7 @@ h2 {
 
 .session-empty {
   margin: 0;
-  color: #a1847a;
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -914,7 +916,9 @@ h2 {
 /* Project lifecycle */
 
 .status-badge {
-  display: inline-flex;
+  /* Block-level so it always sits on its own line above the title pill. */
+  display: flex;
+  width: fit-content;
   align-items: center;
   gap: 6px;
   margin: 0 0 12px;

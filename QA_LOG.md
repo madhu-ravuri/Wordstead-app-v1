@@ -210,3 +210,37 @@ Verification at completion: unit 149/149, E2E 36/36 (stable over three consecuti
   - **Fix:** The user approved both behaviors as built.
   - **Spec change needed:** Yes. Recorded in `SPEC.md` §5.8 AC 4 and AC 8.
 
+## 2026-10-26 — Phase 5: Responsive, accessible, and GitHub Pages release
+
+Verification so far: unit 149/149; E2E 46/46 (138/138 over three full repeats, plus 90/90 on a 15× stress run of the keyboard/focus tests); production-build E2E 8/8 on desktop and phone profiles (24/24 over three repeats); and lint, typecheck (now including all Playwright files), and build all pass. axe-core WCAG 2.1 A/AA scans of 12 screens at 1440×900 and 375×740 report no violations. **Not yet done:** deploying to GitHub Pages and testing the live URL (needs a push and a one-time Pages setting from the user), and a manual screen-reader pass (automated scans and keyboard tests aren't a substitute).
+
+- **Phase:** Phase 5
+  - **What went wrong:** Several text colors failed WCAG AA contrast (4.5:1). These were the coral eyebrow/link color (3.2–3.5:1), four muted greys for dates, labels, and empty states (2.9–3.8:1), and the footer and caption on the coral background (about 3.5:1). Form-field borders (1.7:1) and the focus ring on coral (2.1:1) failed the 3:1 non-text minimum. axe only caught some of these, because it marks text on the paper's gradient texture as "incomplete" rather than failing it.
+  - **How it was caught:** An axe-core scan (`tests/e2e/accessibility.spec.ts`), followed by computing every text and background pair directly.
+  - **Fix:** New tokens: `--coral-dark` #a84e46 (≥4.88:1), one `--muted` #7f625d (≥4.93:1), `--on-coral` #4a262c (5.10:1), `--field-border` #9c8174 (≥3.48:1), and a dark focus ring on the coral field. The coral sparkline (3.13:1) already passed 3:1.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 5
+  - **What went wrong:** Several keyboard and screen-reader gaps. Moving between pages didn't move focus or change the tab title. A rejected form left focus on the submit button. Closing the project edit form dropped focus. The dashboard notice used a live region inserted together with its text, which many screen readers don't announce.
+  - **How it was caught:** Code review against §5.9 AC 6 and Phase 5 task 3.
+  - **Fix:** Each page now has a title (for example "Harbor Song · Wordstead"). After navigating, focus moves to the new page's heading, unless a field has autofocused. A failed submit focuses the first invalid field, whose error is linked as its description. Closing the edit form returns focus to the pencil button and announces "Changes saved." The notice region is now always present. Covered by `tests/e2e/keyboard-and-focus.spec.ts`, including a keyboard-only import that drives the native file picker.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 5
+  - **What went wrong:** `npm run typecheck` didn't cover the Playwright tests or configs, so a type error in an E2E file would only surface at run time.
+  - **How it was caught:** Reviewing `tsconfig*.json` while adding the production config.
+  - **Fix:** Added `tsconfig.e2e.json` (ES2023 + DOM) to the project references, then confirmed a deliberate error in a test file fails `tsc -b`.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 5
+  - **What went wrong:** Two flaky E2E races. (1) An import started on a project page, and the test checked the status region before the app had moved to the dashboard, so it found three status regions. (2) The new heading focus after navigation could take focus from a control the test had just focused, so an Enter press went to the heading.
+  - **How it was caught:** A failure on the third of three consecutive full runs, then reproduced with `--repeat-each`.
+  - **Fix:** These tests now wait for the dashboard, or for focus on the new page's heading, before acting, and target the page-level notice region directly. The races were in the tests, not in what a user can do.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 5
+  - **What went wrong:** The plan warns that a dev server doesn't prove GitHub Pages routing works, and nothing tested the production build.
+  - **How it was caught:** Phase 5 task 5 and the Automated verification notes in IMP_PLAN.md.
+  - **Fix:** Added `npm run test:e2e:prod` (`playwright.prod.config.ts`). It builds and serves `dist/` from the `/Wordstead-app-v1/` subpath and verifies: only GET requests for the app's own assets (no backend, analytics, or font CDNs); no 4xx/5xx responses; a direct project link survives a refresh; core workflows work offline after load; and bundled fonts and favicon load from the subpath. A scan of `dist/` finds only XML namespace identifiers and React's error-doc link text, neither of which is fetched. Added `.github/workflows/deploy.yml` (all checks on every push and PR; deploys `dist/` to Pages from `master`).
+  - **Spec change needed:** No.
+

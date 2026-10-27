@@ -15,7 +15,8 @@ async function createProject(page: Page, title: string, startingCount = '') {
   await page.getByLabel('Title').fill(title)
   if (startingCount) await page.getByLabel('Starting word count').fill(startingCount)
   await page.getByRole('button', { name: 'Save project' }).click()
-  await expect(page.getByRole('heading', { name: title })).toBeVisible()
+  // Navigation is complete once focus has moved to the new page's heading.
+  await expect(page.getByRole('heading', { level: 1, name: title })).toBeFocused()
 }
 
 async function logSession(page: Page, words: string, date?: string) {

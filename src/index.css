@@ -22,13 +22,16 @@
   /* Chart lines: the + button's hue, brightened so thin strokes read as cherry, not black. */
   --cherry: #8e2c3d;
   --coral: #df8c7d;
-  --coral-dark: #c96e64;
+  /* Text colors meet WCAG AA (4.5:1) on every paper background they appear on. */
+  --coral-dark: #a84e46;
   --paper: #fff5e7;
   --paper-edge: #f0dfc9;
   --paper-shadow: #743d3d;
   --white: #fffdf8;
   --line: #e3cdb9;
-  --muted: #9d7d77;
+  --muted: #7f625d;
+  --on-coral: #4a262c;
+  --field-border: #9c8174;
   --error: #a63737;
   --display: 'Fraunces', Georgia, serif;
   --body: 'DM Sans', sans-serif;
@@ -64,6 +67,17 @@ input:focus-visible,
 textarea:focus-visible {
   outline: 3px solid #ae4c4d;
   outline-offset: 3px;
+}
+
+/* Headings receive programmatic focus after navigation; they aren't controls, so no ring. */
+h1[tabindex='-1']:focus {
+  outline: none;
+}
+
+/* On the coral field the paper focus color is too faint (2:1); use dark ink instead. */
+.brand-header :focus-visible,
+.local-footer :focus-visible {
+  outline-color: var(--on-coral);
 }
 
 ::selection {

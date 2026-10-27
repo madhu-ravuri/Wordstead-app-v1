@@ -41,8 +41,8 @@ npm run build
 1. Scaffold Vite + React + TypeScript; add Vitest, Testing Library, Playwright, ESLint, and scripts named in the verification contract. Configure static output and GitHub Pages-safe navigation. **Traceability:** §1; §5.1 AC 1, 4; §5.9 AC 6, 7.
 2. Define versioned Project/Session types and IndexedDB schema/repository boundaries, including upgrade handling and non-destructive storage errors. Create both stores even though session UI arrives in Phase 2. **Traceability:** §4; §5.1 AC 1, 2, 3.
 3. Implement project validation and create/edit operations: trimmed required title, optional fields, default starting count, integer range 0-1,000,000 inclusive, and timestamps/status metadata. **Traceability:** §4 Project; §5.2 AC 2-8.
-4. Build the dashboard shell and active/completed list sections against `mockup.png`, including the `+` action and useful empty states. Show each created project's title and starting-count total. **Traceability:** §3 stories 1, 2, 10; §5.2 AC 1, 6; §5.7 AC 4, 5; §5.9 AC 1-3.
-5. Build the project detail shell against `project page mockup.png`: masthead, paper panel, title pill, synopsis and metadata, accessible pencil edit button, and an empty session-history state. **Traceability:** §5.7 AC 1, 3, 5-8, 10; §5.9 AC 4-7.
+4. Build the dashboard shell and active/completed list sections against `docs/mockup.png`, including the `+` action and useful empty states. Show each created project's title and starting-count total. **Traceability:** §3 stories 1, 2, 10; §5.2 AC 1, 6; §5.7 AC 4, 5; §5.9 AC 1-3.
+5. Build the project detail shell against `docs/project page mockup.png`: masthead, paper panel, title pill, synopsis and metadata, accessible pencil edit button, and an empty session-history state. **Traceability:** §5.7 AC 1, 3, 5-8, 10; §5.9 AC 4-7.
 6. Add responsive layout and keyboard/focus/label behavior for the implemented forms and controls. **Traceability:** §5.9 AC 5-7.
 
 ### Automated verification
@@ -217,12 +217,12 @@ npm run build
 
 ### Manual completion checklist
 
-- [ ] Compare the dashboard to `mockup.png` and project detail to `project page mockup.png`; verify chart bars are not mistaken for data. **§5.5 AC 5; §5.7 AC 6-9; §5.9 AC 1, 2, 4**
-- [ ] Complete create, edit, log, correct, delete-session, complete, reopen, delete-project, export, and import workflows at desktop and phone sizes. **§5.2 AC 1-8; §5.3 AC 1-8; §5.6 AC 1-7; §5.8 AC 1-8**
-- [ ] Use keyboard only through navigation, forms, chart descriptions, confirmation, and import controls; confirm visible focus and usable accessible names. **§5.7 AC 7; §5.9 AC 6**
-- [ ] Inspect empty, invalid-input, storage-error, and import-error states. **§5.1 AC 1, 2; §5.2 AC 3, 4; §5.5 AC 7; §6**
+- [x] Compare the dashboard to `docs/mockup.png` and project detail to `docs/project page mockup.png`; verify chart bars are not mistaken for data. **§5.5 AC 5; §5.7 AC 6-9; §5.9 AC 1, 2, 4**
+- [x] Complete create, edit, log, correct, delete-session, complete, reopen, delete-project, export, and import workflows at desktop and phone sizes. **§5.2 AC 1-8; §5.3 AC 1-8; §5.6 AC 1-7; §5.8 AC 1-8**
+- [x] Use keyboard only through navigation, forms, chart descriptions, confirmation, and import controls; confirm visible focus and usable accessible names. **§5.7 AC 7; §5.9 AC 6**
+- [x] Inspect empty, invalid-input, storage-error, and import-error states. **§5.1 AC 1, 2; §5.2 AC 3, 4; §5.5 AC 7; §6**
 - [ ] Test the deployed GitHub Pages URL on phone and desktop, including direct navigation/refresh on a project detail route. **§1; §5.9 AC 5, 7**
-- [ ] Confirm no login is requested, no user content is sent to a server, and the UI indicates data is local to this browser/device. **§5.1 AC 1, 4**
+- [x] Confirm no login is requested, no user content is sent to a server, and the UI indicates data is local to this browser/device. **§5.1 AC 1, 4**
 
 ## Release Gate
 

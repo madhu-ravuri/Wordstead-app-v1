@@ -4,7 +4,7 @@
 
 Wordstead is a local-first writing progress tracker for people working on multiple writing projects. It records a starting word count for each project and individual writing sessions, then presents project totals and daily writing activity in sparklines. The application has no account or server-side data store: project and session data stay in the user's browser unless explicitly exported.
 
-The product is a responsive static web application suitable for free hosting on GitHub Pages. The supplied `mockup.png` is the visual source of truth for the dashboard, and `project page mockup.png` is the visual source of truth for the individual project view. Other screens extend the visual language of these references without changing their core hierarchy.
+The product is a responsive static web application suitable for free hosting on GitHub Pages. The supplied `docs/mockup.png` is the visual source of truth for the dashboard, and `docs/project page mockup.png` is the visual source of truth for the individual project view. Other screens extend the visual language of these references without changing their core hierarchy.
 
 **Approved layout deviation (Phase 1 review):** The app uses a "postcard" composition: the masthead sits above a single cream paper panel on the coral field, and the overall chart (dashboard) and project sparkline (project detail) sit inside that panel, to the right of the project content on wide layouts, rather than on the coral field outside it as drawn in the mockups. Dashboard project rows are rounded cards with three bands (a full-width title; the sparkline beside the word count; a full-width "date last edited") instead of the mockup's single-line pills. The project-detail and overall chart lines use a brighter cherry (`#8e2c3d`) derived from the `+` button's color, so thin strokes don't read as black. The mockups remain the reference for palette, typography character, pill treatments, chart styling, and information hierarchy.
 
@@ -199,7 +199,7 @@ The storage format must be versioned so future releases can migrate backups and 
 
 **AC 5.** Empty active, completed, and session-history states provide a clear next action where applicable.
 
-**AC 6.** On wide desktop layouts, the project detail follows `project page mockup.png`: the Wordstead masthead sits above a large cream paper-like panel on the coral background, with project information in the panel and the project's sparkline alongside it.
+**AC 6.** On wide desktop layouts, the project detail follows `docs/project page mockup.png`: the Wordstead masthead sits above a large cream paper-like panel on the coral background, with project information in the panel and the project's sparkline alongside it.
 
 **AC 7.** A circular pencil-icon button near the upper-right of the project panel opens project editing. It has an accessible name, visible keyboard focus, and a sufficiently large interactive target.
 
@@ -235,7 +235,7 @@ The storage format must be versioned so future releases can migrate backups and 
 
 **AC 3.** The `+` control is the primary create-project action. Export/import controls remain secondary and unobtrusive.
 
-**AC 4.** The new-project form, session editor, completed-project section, confirmation dialog, and import/export flows use the dashboard's visual language. The project detail follows `project page mockup.png` for its specific hierarchy and composition while retaining that shared palette, typography character, shadows, and paper-inspired treatment.
+**AC 4.** The new-project form, session editor, completed-project section, confirmation dialog, and import/export flows use the dashboard's visual language. The project detail follows `docs/project page mockup.png` for its specific hierarchy and composition while retaining that shared palette, typography character, shadows, and paper-inspired treatment.
 
 **AC 5.** On phone-sized viewports, the dashboard stacks its content into a single-column layout, keeps project actions reachable, and places the overall chart first (so the overall trend is seen first), followed by the dashboard heading and `+` action directly above the project list, without horizontal page scrolling. The project detail stacks its information panel and project sparkline, keeps the edit control reachable, and preserves a readable session history without horizontal page scrolling.
 

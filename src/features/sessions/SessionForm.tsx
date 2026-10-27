@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import type { WritingSession } from '../../domain/projects'
 import {
   validateSessionForm,
@@ -29,6 +29,14 @@ export function SessionForm({
   const [errors, setErrors] = useState<SessionFieldErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [failedAttempts, setFailedAttempts] = useState(0)
+  const form = useRef<HTMLFormElement>(null)
+
+  // After a rejected submit, move focus to the first invalid field once its error is rendered.
+  useEffect(() => {
+    if (failedAttempts > 0) form.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
+  }, [failedAttempts])
+
   const idPrefix = session ? `session-${session.id}` : 'new-session'
 
   const updateField = (field: keyof SessionFormValues, value: string) => {
@@ -42,7 +50,10 @@ export function SessionForm({
     const result = validateSessionForm(values, today)
     setErrors(result.errors)
     setSubmitError(null)
-    if (!result.fields) return
+    if (!result.fields) {
+      setFailedAttempts((count) => count + 1)
+      return
+    }
 
     setIsSaving(true)
     try {
@@ -58,6 +69,7 @@ export function SessionForm({
 
   return (
     <form
+      ref={form}
       className="session-form"
       onSubmit={handleSubmit}
       noValidate

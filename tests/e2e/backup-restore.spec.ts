@@ -23,7 +23,8 @@ async function createProject(page: Page, title: string, startingCount = '') {
   await page.getByLabel('Title').fill(title)
   if (startingCount) await page.getByLabel('Starting word count').fill(startingCount)
   await page.getByRole('button', { name: 'Save project' }).click()
-  await expect(page.getByRole('heading', { name: title })).toBeVisible()
+  // Navigation is complete once focus has moved to the new page's heading.
+  await expect(page.getByRole('heading', { level: 1, name: title })).toBeFocused()
 }
 
 async function logSession(page: Page, words: string, date: string) {
@@ -236,6 +237,7 @@ test('rejects invalid files and leaves existing data intact', async ({ page }) =
 test('backup controls are low-key footer actions that work by keyboard', async ({ page }) => {
   await createProject(page, 'Keyboard backup draft')
   await page.getByRole('button', { name: 'All projects' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'In progress' })).toBeFocused()
 
   const exportButton = page.getByRole('button', { name: 'Export backup' })
   const footer = page.locator('footer')

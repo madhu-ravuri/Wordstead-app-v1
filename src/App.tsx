@@ -45,6 +45,8 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [storageError, setStorageError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const mainRef = useRef<HTMLElement | null>(null)
+  const hasNavigated = useRef(false)
 
   useEffect(() => {
     const store = new WordsteadRepository()
@@ -199,6 +201,36 @@ function App() {
   const selectedProject = route.page === 'project'
     ? projects.find((project) => project.id === route.id && !project.deletedAt)
     : undefined
+  const pageTitle =
+    route.page === 'new'
+      ? 'New project'
+      : route.page === 'project'
+        ? (selectedProject?.title ?? (isLoading ? null : 'Project not found'))
+        : null
+  const routeKey = route.page === 'project' ? `project:${route.id}` : route.page
+
+  useEffect(() => {
+    document.title = pageTitle ? `${pageTitle} · Wordstead` : 'Wordstead'
+  }, [pageTitle])
+
+  // After client-side navigation, start at the top and move focus to the new page's heading so
+  // keyboard and screen-reader users know the page changed. Initial load keeps the browser default,
+  // and a field that autofocused (e.g. the new-project title) keeps focus.
+  useEffect(() => {
+    if (isLoading) return
+    if (!hasNavigated.current) {
+      hasNavigated.current = true
+      return
+    }
+    const main = mainRef.current
+    if (!main || main.contains(document.activeElement)) return
+    window.scrollTo(0, 0)
+    const heading = main.querySelector('h1')
+    if (heading) {
+      heading.setAttribute('tabindex', '-1')
+      heading.focus({ preventScroll: true })
+    }
+  }, [routeKey, isLoading])
 
   return (
     <div className="app-frame">
@@ -216,19 +248,22 @@ function App() {
         </div>
       )}
 
-      {notice && (
-        <p className="app-notice" role="status">
-          <span>{notice}</span>
-          <button className="text-button" type="button" onClick={() => setNotice(null)}>
-            Dismiss
-          </button>
-        </p>
-      )}
+      {/* Always rendered so screen readers announce notices when their text appears. */}
+      <div className="app-notice-region" role="status">
+        {notice && (
+          <p className="app-notice">
+            <span>{notice}</span>
+            <button className="text-button" type="button" onClick={() => setNotice(null)}>
+              Dismiss
+            </button>
+          </p>
+        )}
+      </div>
 
       {isLoading ? (
-        <main className="paper loading-paper" aria-live="polite">Opening your desk…</main>
+        <main ref={mainRef} className="paper loading-paper" aria-live="polite">Opening your desk…</main>
       ) : route.page === 'new' ? (
-        <main className="paper form-paper">
+        <main ref={mainRef} className="paper form-paper">
           <ProjectForm
             onCancel={() => navigate('/')}
             onSubmit={handleCreate}
@@ -236,7 +271,7 @@ function App() {
           />
         </main>
       ) : route.page === 'project' ? (
-        <main className="paper detail-paper">
+        <main ref={mainRef} className="paper detail-paper">
           {selectedProject ? (
             <ProjectDetail
               key={selectedProject.id}
@@ -261,7 +296,7 @@ function App() {
           )}
         </main>
       ) : (
-        <main className="paper dashboard-paper">
+        <main ref={mainRef} className="paper dashboard-paper">
           <Dashboard
             activeProjects={activeProjects}
             completedProjects={completedProjects}

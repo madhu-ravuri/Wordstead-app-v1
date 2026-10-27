@@ -6,7 +6,8 @@ async function createProject(page: Page, title: string, startingCount = '') {
   await page.getByLabel('Title').fill(title)
   if (startingCount) await page.getByLabel('Starting word count').fill(startingCount)
   await page.getByRole('button', { name: 'Save project' }).click()
-  await expect(page.getByRole('heading', { name: title })).toBeVisible()
+  // Navigation is complete once focus has moved to the new page's heading.
+  await expect(page.getByRole('heading', { level: 1, name: title })).toBeFocused()
 }
 
 function metadataValue(page: Page, term: string) {
@@ -141,7 +142,7 @@ test('project detail pencil control receives visible keyboard focus', async ({ p
   await page.getByRole('button', { name: 'New project' }).click()
   await page.getByLabel('Title').fill('Keyboard focus draft')
   await page.getByRole('button', { name: 'Save project' }).click()
-  await expect(page.getByRole('heading', { name: 'Keyboard focus draft' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Keyboard focus draft' })).toBeFocused()
 
   const backButton = page.getByRole('button', { name: 'All projects' })
   const logButton = page.getByRole('button', { name: 'Log session' })

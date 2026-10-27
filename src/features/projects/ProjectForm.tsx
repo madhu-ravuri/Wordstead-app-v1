@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import {
   validateProjectForm,
@@ -34,6 +34,13 @@ export function ProjectForm({
   const [errors, setErrors] = useState<Partial<Record<keyof ProjectFormValues, string>>>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [failedAttempts, setFailedAttempts] = useState(0)
+  const form = useRef<HTMLFormElement>(null)
+
+  // After a rejected submit, move focus to the first invalid field once its error is rendered.
+  useEffect(() => {
+    if (failedAttempts > 0) form.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
+  }, [failedAttempts])
 
   const updateField = (field: keyof ProjectFormValues, value: string) => {
     setValues((current) => ({ ...current, [field]: value }))
@@ -46,7 +53,10 @@ export function ProjectForm({
     const result = validateProjectForm(values)
     setErrors(result.errors)
     setSubmitError(null)
-    if (!result.fields) return
+    if (!result.fields) {
+      setFailedAttempts((count) => count + 1)
+      return
+    }
 
     setIsSaving(true)
     try {
@@ -73,7 +83,7 @@ export function ProjectForm({
         <h1>{initialProject ? 'Edit project' : 'New project'}</h1>
       </div>
 
-      <form className="project-form" onSubmit={handleSubmit} noValidate>
+      <form ref={form} className="project-form" onSubmit={handleSubmit} noValidate>
         {submitError && <p className="form-error form-error-summary" role="alert">{submitError}</p>}
         <div className="form-field">
           <label htmlFor="project-title">Title <span aria-hidden="true">*</span></label>

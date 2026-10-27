@@ -12,7 +12,8 @@ async function createProject(page: Page, title: string, startingCount = '') {
   await page.getByLabel('Title').fill(title)
   if (startingCount) await page.getByLabel('Starting word count').fill(startingCount)
   await page.getByRole('button', { name: 'Save project' }).click()
-  await expect(page.getByRole('heading', { name: title })).toBeVisible()
+  // Navigation is complete once focus has moved to the new page's heading.
+  await expect(page.getByRole('heading', { level: 1, name: title })).toBeFocused()
 }
 
 async function logSession(page: Page, words: string, date?: string) {
@@ -171,7 +172,7 @@ test('confirming deletion hides the project but keeps its records and overall hi
 
   await page.reload()
   await expect(page.getByRole('button', { name: /Harbor Song/ })).toHaveCount(0)
-  await expect(page.getByRole('status')).toHaveCount(0)
+  await expect(page.getByRole('status')).toHaveText('')
   await expect(overallChart(page)).toHaveAttribute('aria-label', overallBefore!)
 
   await page.goto(projectUrl)
@@ -233,4 +234,20 @@ test('lifecycle controls and the dialog fit a phone viewport', async ({ page }) 
   expect(box.x).toBeGreaterThanOrEqual(0)
   expect(box.x + box.width).toBeLessThanOrEqual(375)
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0)
+})
+
+test('the completed badge sits on its own line above the title at every width', async ({ page }) => {
+  await createProject(page, 'Badge placement draft')
+  await page.getByRole('button', { name: 'Mark complete' }).click()
+  const badge = page.getByText('Completed Oct 23, 2026')
+  const title = page.getByRole('heading', { level: 1, name: 'Badge placement draft' })
+  await expect(badge).toBeVisible()
+
+  for (const width of [1440, 1024, 375]) {
+    await page.setViewportSize({ width, height: 900 })
+    const badgeBox = (await badge.boundingBox())!
+    const titleBox = (await title.boundingBox())!
+    expect(badgeBox.y + badgeBox.height).toBeLessThanOrEqual(titleBox.y)
+    expect(Math.abs(badgeBox.x - titleBox.x)).toBeLessThan(2)
+  }
 })
