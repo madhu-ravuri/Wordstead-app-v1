@@ -1,5 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 import type { Project, WritingSession } from '../domain/projects'
+import type { Dataset } from './backup'
 
 export const DATABASE_NAME = 'wordstead'
 export const DATABASE_VERSION = 1
@@ -85,6 +86,48 @@ export class WordsteadRepository {
     await this.withStorageErrors('delete this session', async () => {
       const database = await this.database
       await database.delete('sessions', id)
+    })
+  }
+
+  async exportData(): Promise<Dataset> {
+    return this.withStorageErrors('read your data for export', async () => {
+      const database = await this.database
+      const transaction = database.transaction(['projects', 'sessions'])
+      const [projects, sessions] = await Promise.all([
+        transaction.objectStore('projects').getAll(),
+        transaction.objectStore('sessions').getAll(),
+        transaction.done,
+      ])
+      return { projects, sessions }
+    })
+  }
+
+  // One transaction: either the whole dataset is written or nothing changes (§5.8 AC 7).
+  async replaceAll(data: Dataset): Promise<void> {
+    await this.withStorageErrors('import this backup', async () => {
+      const database = await this.database
+      const transaction = database.transaction(['projects', 'sessions'], 'readwrite')
+      const projects = transaction.objectStore('projects')
+      const sessions = transaction.objectStore('sessions')
+      // Individual request failures surface through `transaction.done`; once one fails the rest
+      // are aborted, so mark each handled to avoid unhandled rejections.
+      const track = (request: Promise<unknown>) => void request.catch(() => undefined)
+      try {
+        track(projects.clear())
+        track(sessions.clear())
+        for (const project of data.projects) track(projects.put(project))
+        for (const session of data.sessions) track(sessions.put(session))
+        await transaction.done
+      } catch (error) {
+        // A failed request aborts the transaction; make sure it never commits partially.
+        try {
+          transaction.abort()
+        } catch {
+          // Already aborted.
+        }
+        await transaction.done.catch(() => undefined)
+        throw error
+      }
     })
   }
 

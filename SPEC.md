@@ -217,7 +217,7 @@ The storage format must be versioned so future releases can migrate backups and 
 
 **AC 3.** Import validates file type, schema version, required fields, identifiers, and value constraints before changing stored data. Project IDs and session IDs must each be unique within the imported file; any duplicate ID within that file makes it invalid, even when the duplicate records are identical. An invalid or unsupported file leaves existing data unchanged and displays an error.
 
-**AC 4.** Importing into a non-empty dataset asks the user whether to replace all data or merge. Importing into an empty dataset may proceed after validation without a replace/merge choice.
+**AC 4.** Importing into a non-empty dataset asks the user whether to replace all data or merge. Importing into an empty dataset proceeds after validation without a replace/merge choice, after a single confirmation that lists what will be restored.
 
 **AC 5.** Replace makes the imported dataset the complete local dataset, including its soft-deleted records.
 
@@ -225,7 +225,7 @@ The storage format must be versioned so future releases can migrate backups and 
 
 **AC 7.** The import confirmation states whether existing data will be replaced or merged. The app applies a successful import atomically so a failed import cannot leave a partial dataset.
 
-**AC 8.** Exported/imported session dates remain the same local calendar dates; restoring data does not reinterpret them through a UTC date conversion.
+**AC 8.** Exported/imported session dates remain the same local calendar dates; restoring data does not reinterpret them through a UTC date conversion. Imported sessions dated after the current local date are accepted, because a backup made in a time zone ahead of this device can legitimately contain them; the session form still blocks future dates.
 
 ### 5.9 Responsive design and visual system
 

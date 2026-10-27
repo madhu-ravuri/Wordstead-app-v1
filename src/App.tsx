@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { BookOpenText } from 'lucide-react'
+import { backupFileName, createBackup, serializeBackup, type Dataset } from './data/backup'
 import { WordsteadRepository } from './data/database'
 import { getTodayLocalDate } from './domain/dates'
 import {
@@ -17,6 +18,8 @@ import {
   type WritingSession,
 } from './domain/projects'
 import { createSession, updateSession, type SessionFields } from './domain/sessions'
+import { BackupControls } from './features/backup/BackupControls'
+import { describeDataset } from './features/backup/describeDataset'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { ProjectDetail } from './features/projects/ProjectDetail'
 import { ProjectForm } from './features/projects/ProjectForm'
@@ -163,6 +166,35 @@ function App() {
     setSessions((current) => current.filter((item) => item.id !== session.id))
   }
 
+  const handleExport = async () => {
+    const store = repository.current
+    if (!store) throw new Error('Browser storage is not ready. Nothing was exported.')
+    const data = await store.exportData()
+    const fileName = backupFileName(getTodayLocalDate())
+    const blob = new Blob([serializeBackup(createBackup(data))], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = fileName
+    document.body.append(link)
+    link.click()
+    link.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000)
+    setNotice(`Downloaded ${fileName} with ${describeDataset(data)}.`)
+  }
+
+  // The whole dataset is written in one transaction, then state is reloaded from storage.
+  const handleApplyImport = async (data: Dataset, summary: string) => {
+    const store = repository.current
+    if (!store) throw new Error('Browser storage is not ready. Your data was not changed.')
+    await store.replaceAll(data)
+    const stored = await store.exportData()
+    setProjects(stored.projects)
+    setSessions(stored.sessions)
+    navigate('/')
+    setNotice(summary)
+  }
+
   const { active: activeProjects, completed: completedProjects } = getVisibleProjects(projects, sessions)
   const selectedProject = route.page === 'project'
     ? projects.find((project) => project.id === route.id && !project.deletedAt)
@@ -182,6 +214,15 @@ function App() {
         <div className="storage-alert" role="alert">
           <strong>Local storage unavailable.</strong> {storageError} Your existing data has not been changed.
         </div>
+      )}
+
+      {notice && (
+        <p className="app-notice" role="status">
+          <span>{notice}</span>
+          <button className="text-button" type="button" onClick={() => setNotice(null)}>
+            Dismiss
+          </button>
+        </p>
       )}
 
       {isLoading ? (
@@ -221,14 +262,6 @@ function App() {
         </main>
       ) : (
         <main className="paper dashboard-paper">
-          {notice && (
-            <p className="app-notice" role="status">
-              <span>{notice}</span>
-              <button className="text-button" type="button" onClick={() => setNotice(null)}>
-                Dismiss
-              </button>
-            </p>
-          )}
           <Dashboard
             activeProjects={activeProjects}
             completedProjects={completedProjects}
@@ -242,8 +275,16 @@ function App() {
       )}
 
       <footer className="local-footer">
-        <span className="local-indicator" aria-hidden="true" />
-        Your writing stays in this browser and isn’t synced to other devices
+        <p className="local-note">
+          <span className="local-indicator" aria-hidden="true" />
+          Your writing stays in this browser and isn’t synced to other devices
+        </p>
+        <BackupControls
+          current={{ projects, sessions }}
+          onExport={handleExport}
+          onApplyImport={handleApplyImport}
+          disabled={isLoading || Boolean(storageError)}
+        />
       </footer>
     </div>
   )

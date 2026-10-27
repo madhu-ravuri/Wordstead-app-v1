@@ -182,3 +182,31 @@ Verification at completion: unit 101/101, E2E 28/28 (stable over three consecuti
   - **Fix:** The user decided: (1) keep reopening on the completed project's page only; (2) a completed project's sessions are read-only until it is reopened. This was changed: Edit and Delete are hidden, the note reads "Reopen it to log, correct, or delete sessions", and App's session handlers also refuse changes to non-active projects via `canChangeSessions`. (3) Keep status changes updating "date last edited". Covered by domain, component, and E2E tests.
   - **Spec change needed:** Yes. Updated `SPEC.md` §5.3 AC 6, §5.6 AC 4, §5.7 AC 4, and §7 assumption 4.
 
+## 2026-10-26 — Phase 4: Backup and restore
+
+Verification at completion: unit 149/149, E2E 36/36 (stable over three consecutive runs), and lint, typecheck, and build all pass. The plan's targeted Phase 4 commands also pass (36 backup/import tests, 6 backup E2E tests). The E2E tests use real downloads and file uploads, restore into a fresh browser profile in a different time zone, and compare raw IndexedDB contents before and after every failed or cancelled import. The backup format is documented in `docs/backup-format.md`.
+
+- **Phase:** Phase 4
+  - **What went wrong:** When a failed write aborted the import transaction, the remaining queued requests each rejected with `AbortError`. Only the first was handled, so Vitest reported unhandled rejections. The rollback itself was correct.
+  - **How it was caught:** Vitest "Unhandled Errors" during the atomic-replace test in `src/data/import.test.ts`.
+  - **Fix:** `replaceAll` now attaches a handler to each request as it is queued and judges success by `transaction.done`. It still explicitly aborts if a request throws synchronously, so nothing commits partially.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 4
+  - **What went wrong:** The import dialog is rendered from the footer, so it inherited the footer's centered text. On phones, the conflict list scrolled inside the scrolling dialog, which pushed "Merge data" out of view.
+  - **How it was caught:** Manual screenshot review at 1440×900 and 375×740.
+  - **Fix:** The import dialog is left-aligned and its action buttons stay pinned to the bottom. On phones the conflict list no longer scrolls on its own, so there's one scroll area.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 4
+  - **What went wrong:** Several of my own test expectations were wrong: the seeded overall total, a replace test that seeded in a Tokyo-time profile but expected Los Angeles dates, a summary test that couldn't reach the truncation limit, and verb agreement in the merge summary ("1 record already match").
+  - **How it was caught:** Re-tracing the arithmetic before running, plus component test review.
+  - **Fix:** Corrected the expectations and the copy ("matches"/"differs" for a single record). A type error in the dialog test's mocks, caught by `tsc`, was also fixed.
+  - **Spec change needed:** No.
+
+- **Phase:** Phase 4
+  - **What went wrong:** Two judgment calls the spec doesn't address. (1) Sessions dated after today are accepted on import. A backup from a time zone ahead of this device can legitimately contain "tomorrow" (charts end at today, so these days show once they arrive). The UI still blocks future dates. (2) Importing into an empty browser still shows a one-step "Restore this backup?" confirmation listing what will be added. §5.8 AC 4 allows proceeding without a replace/merge choice, and it's still asked as a final check.
+  - **How it was caught:** Implementation review against SPEC.md §5.3 AC 2 and §5.8 AC 4.
+  - **Fix:** The user approved both behaviors as built.
+  - **Spec change needed:** Yes. Recorded in `SPEC.md` §5.8 AC 4 and AC 8.
+

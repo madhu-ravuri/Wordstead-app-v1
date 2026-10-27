@@ -1,6 +1,6 @@
 # Wordstead
 
-Wordstead is a local-first writing project tracker. Phase 1 provides project creation, editing, a dashboard, and project details. Project records are stored in this browser with IndexedDB; there are no accounts or cloud sync. Session logging, live activity charts, completion actions, and backup/restore are planned for later phases.
+Wordstead is a local-first writing project tracker: projects, writing sessions, daily activity charts, completion and soft deletion, and JSON backup/restore. Data is stored in this browser with IndexedDB; there are no accounts or cloud sync. Use **Export backup** in the footer to keep a copy, and see [docs/backup-format.md](docs/backup-format.md) for the file format.
 
 ## Development
 

@@ -615,15 +615,58 @@ h2 {
 }
 
 .local-footer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
   margin-top: 24px;
   color: #653f43;
   font-size: 12px;
   font-weight: 600;
   text-align: center;
+}
+
+.local-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.backup-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px 8px;
+}
+
+.backup-controls .form-error {
+  flex-basis: 100%;
+}
+
+.footer-link {
+  min-height: 32px;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: #653f43;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgb(101 63 67 / 40%);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.footer-link:hover:not(:disabled) {
+  color: var(--ink);
+  text-decoration-color: currentColor;
+}
+
+.footer-link:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .local-indicator {
@@ -944,6 +987,172 @@ h2 {
   margin: 4px 0 0;
 }
 
+.import-dialog {
+  width: min(640px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  padding-bottom: 0;
+  overflow-y: auto;
+  /* Rendered from the footer; don't inherit its centered text. */
+  text-align: left;
+}
+
+/* Keep the decision buttons visible however long the dialog scrolls. */
+.import-dialog .form-actions {
+  position: sticky;
+  bottom: 0;
+  margin: 18px -26px 0;
+  padding: 14px 26px 20px;
+  border-top: 1px solid #ecdccb;
+  background: var(--paper);
+}
+
+.import-file-name {
+  margin: -6px 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.import-problems {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--error);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.import-mode {
+  display: grid;
+  gap: 10px;
+  margin: 6px 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.import-mode legend {
+  margin-bottom: 8px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.import-mode-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid #e3cdb9;
+  border-radius: 3px;
+  background: var(--white);
+  cursor: pointer;
+}
+
+.import-mode-option:has(input:checked) {
+  border-color: var(--ink);
+  box-shadow: 2px 3px 0 #d8b9a4;
+}
+
+.import-mode-option input,
+.conflict-choices input {
+  margin-top: 3px;
+  accent-color: var(--ink);
+}
+
+.import-mode-option > span {
+  display: grid;
+  gap: 3px;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.import-mode-option strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.conflict-bulk {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  margin-bottom: 8px;
+}
+
+.conflict-list {
+  display: grid;
+  gap: 12px;
+  max-height: 46dvh;
+  margin: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.conflict-list fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #e3cdb9;
+  border-radius: 3px;
+  background: var(--white);
+}
+
+.conflict-list legend {
+  padding: 0 4px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.conflict-table {
+  width: 100%;
+  margin: 4px 0 10px;
+  border-collapse: collapse;
+  font-size: 12px;
+  table-layout: fixed;
+}
+
+.conflict-table th,
+.conflict-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid #efe1d2;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.conflict-table thead th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.conflict-table tbody th {
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.conflict-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 13px;
+}
+
+.conflict-choices label {
+  display: inline-flex;
+  gap: 7px;
+  align-items: flex-start;
+  min-height: 28px;
+  cursor: pointer;
+}
+
+.conflict-remaining {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .confirm-dialog .form-actions {
   flex-wrap: wrap;
   margin-top: 18px;
@@ -955,7 +1164,7 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 6px 16px;
-  margin: 0 0 24px;
+  margin: 0 8px 16px;
   padding: 10px 14px;
   border-left: 3px solid #b9b08f;
   background: #f7f2e2;
@@ -1111,5 +1320,27 @@ h2 {
 
   .session-form {
     grid-template-columns: 1fr;
+  }
+
+  .confirm-dialog {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .import-dialog .form-actions {
+    margin-right: -18px;
+    margin-left: -18px;
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .confirm-dialog .form-actions > button {
+    flex: 1 1 auto;
+  }
+
+  /* One scroll area on phones: the whole dialog, not a nested list. */
+  .conflict-list {
+    max-height: none;
+    overflow: visible;
   }
 }

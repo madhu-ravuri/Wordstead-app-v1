@@ -180,11 +180,11 @@ npm run build
 
 ### Manual completion checklist
 
-- [ ] Export data containing active, completed, and deleted projects; verify the downloaded file is versioned and includes all sessions. **§5.8 AC 1, 2**
-- [ ] Import into empty storage and verify dates and values restore unchanged. **§5.8 AC 3, 8**
-- [ ] Import into non-empty storage and test both replace and merge. **§5.8 AC 4-6**
-- [ ] Import a file with duplicate project IDs and another with duplicate session IDs; reject both without changing local data. Then test identical-ID and differing-ID collisions between a valid file and existing data, including cancelling a conflict. **§5.8 AC 3, 6, 7; §6 import edge case**
-- [ ] Try malformed and unsupported files and verify an error is shown while existing data remains intact. **§5.8 AC 3, 7**
+- [x] Export data containing active, completed, and deleted projects; verify the downloaded file is versioned and includes all sessions. **§5.8 AC 1, 2**
+- [x] Import into empty storage and verify dates and values restore unchanged. **§5.8 AC 3, 8**
+- [x] Import into non-empty storage and test both replace and merge. **§5.8 AC 4-6**
+- [x] Import a file with duplicate project IDs and another with duplicate session IDs; reject both without changing local data. Then test identical-ID and differing-ID collisions between a valid file and existing data, including cancelling a conflict. **§5.8 AC 3, 6, 7; §6 import edge case**
+- [x] Try malformed and unsupported files and verify an error is shown while existing data remains intact. **§5.8 AC 3, 7**
 
 ## Phase 5: Responsive, Accessible, and GitHub Pages Release
 
